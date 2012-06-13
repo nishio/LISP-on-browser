@@ -1,9 +1,15 @@
 <html>
 <head>
   <title>LISP Interpreter</title>
+  <script src="jquery-1.7.2.min.js"></script>
+  <script src="jquery.terminal-0.4.15.js"></script>
   <script src="lisp.js"></script>
+  <link rel="stylesheet" type="text/css" href="terminal.css" />
+  <script>
+    $(function() { lisp.repl_terminal('#term'); });
+  </script>
 </head>
 <body>
-  <!-- For testing -->
+  <div id="term"></div>
 </body>
 </html>
