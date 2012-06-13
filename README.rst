@@ -1,6 +1,6 @@
-============================
- EDSAC Simulator on browser
-============================
+=================
+ LISP on browser
+=================
 
 This is small implementation of LISP,
 which written in JavaScript and run on browsers.
