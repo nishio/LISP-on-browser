@@ -66,7 +66,8 @@ lisp.test = function() {
             new lisp.Cons(num, new lisp.Cons(sym, lisp.nil)).print(), 
             '(5 bla)');
     } catch (err) {
-        return err;
+        alert(err);
     }
-    return true;
 }
+
+lisp.test();
