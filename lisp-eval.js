@@ -34,7 +34,7 @@ lisp.Cons.prototype.eval = function() {
 
         var verifyArgNum = function(n) {
             if (args.length != n)
-                throw n+' arguments required for '+ s;
+                throw 'wrong number of arguments for '+ s;
         };
 
         if (s == 'if') {
@@ -90,3 +90,9 @@ lisp.env['/'] = lisp.numFunc('/', function(a,b) {
                                      return a/b; });
 lisp.env.t = new lisp.Symbol('t');
 lisp.env.t.eval = function() { return this; };
+
+lisp.env.eval = new lisp.Func('eval', function(args) {
+                                  if (args.length != 1)
+                                      throw '1 argument required for eval';
+                                  return args[0].eval();
+                              });
