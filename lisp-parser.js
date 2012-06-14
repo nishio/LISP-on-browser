@@ -44,6 +44,20 @@ lisp.Parser.prototype = {
         if (s != null)
             return new lisp.Number(parseFloat(s));
 
+        // apostrophe (quote)
+        var s = this.tryConsume(/^(\')/);
+        if (s != null) {
+            var term = this.parseOne();
+            if (term == null)
+                this.parseError();
+            return new lisp.Cons(
+                new lisp.Symbol('quote'),
+                new lisp.Cons(
+                    term,
+                    lisp.nil));
+        }
+
+
         // symbol/nil
         var s = this.tryConsume(/^([^\s\(\)\.0-9][^\s\(\)]*)/);
         if (s != null) {

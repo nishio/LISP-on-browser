@@ -32,6 +32,9 @@ lisp.test = function() {
         assertParse('(1 2 3 . 4)', '(1 2 3 . 4)');
         assertParse('(+ . (1 . (2 . (3 . ()))))', '(+ 1 2 3)');
 
+        assertParse("'(+ 2 2)", '(quote (+ 2 2))');
+        assertEval("'(+ 2 2)", '(+ 2 2)');
+
         assertEval('(+ 2 (* 3 4) (/ 2 4))', '14.5');
 
         assertEval('(if () a 3)', '3');
