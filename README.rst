@@ -47,7 +47,6 @@ TODO
 
   - Macros (and quasiquote/unquote)
   - Strings, I/O (print, read) using terminal
-  - Macros (and quasiquote/unquote)
 
 
 License
