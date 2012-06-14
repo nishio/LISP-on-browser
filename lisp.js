@@ -1,5 +1,5 @@
 
-// Lisp datatypes
+// Lisp datatypes and helper functions
 
 lisp = {};
 
@@ -42,4 +42,28 @@ lisp.Cons.prototype = {
 lisp.nil = {
     type: 'nil',
     print: function() { return 'nil'; }
+};
+
+lisp.checkType = function(term, type) {
+    if (term.type != type)
+        throw 'expected '+type+', got '+term.print();
+};
+
+lisp.termToList = function(term) {
+    var list = [];
+    while (term.type != 'nil') {
+        lisp.checkType(term, 'cons');
+        list.push(term.car);
+        term = term.cdr;
+    }
+    return list;
+};
+
+lisp.listToTerm = function(list, start) {
+    var result = start;
+    if (start == undefined)
+        result = lisp.nil;
+    for (var i = list.length-1; i >= 0; i--)
+        result = new lisp.Cons(list[i], result);
+    return result;
 };

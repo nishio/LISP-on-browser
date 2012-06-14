@@ -76,10 +76,7 @@ lisp.Parser.prototype = {
                 } else
                     list.push(term);
             }
-            var result = cdr;
-            for (var i = list.length-1; i >= 0; i--)
-                result = new lisp.Cons(list[i], result);
-            return result;
+            return lisp.listToTerm(list, cdr);
         }
 
         return null;
