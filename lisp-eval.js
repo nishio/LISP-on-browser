@@ -26,9 +26,34 @@ lisp.Symbol.prototype.eval = function() {
 };
 
 lisp.Cons.prototype.eval = function() {
-    var car = this.car.eval();
     var args = lisp.termToList(this.cdr);
 
+    // check for special forms
+    if (this.car.type == 'symbol') {
+        var s = this.car.s;
+
+        var verifyArgNum = function(n) {
+            if (args.length != n)
+                throw n+' arguments required for '+ s;
+        };
+
+        if (s == 'if') {
+            verifyArgNum(3);
+            var test = args[0].eval();
+            if (test.type == 'nil')
+                return args[2].eval();
+            else
+                return args[1].eval();
+        }
+
+        if (s == 'quote') {
+            verifyArgNum(1);
+            return args[0];
+        }
+    }
+
+    // ordinary function
+    var car = this.car.eval();
     lisp.checkType(car, 'function');
     for (var i = 0; i < args.length; ++i)
         args[i] = args[i].eval();
