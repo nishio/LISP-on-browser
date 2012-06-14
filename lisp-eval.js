@@ -63,3 +63,5 @@ lisp.env['/'] = lisp.numFunc('/', function(a,b) {
                                      throw 'division by zero';
                                  else
                                      return a/b; });
+lisp.env.t = new lisp.Symbol('t');
+lisp.env.t.eval = function() { return this; };
