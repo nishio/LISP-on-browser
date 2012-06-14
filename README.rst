@@ -21,20 +21,30 @@ It makes source codes huge and makes difficult to read.
 TODO
 ====
 
-- Milestone1: S-expression Parser
+- (done) Milestone1: S-expression Parser
 
   - given string such like "(* 1 (+ 2 3))" and return syntax trees
   - in this point forget about reader macros such as "'(1 2 3)"
 
-- Make further milestones
+- Milestone2: Some Built-in function (+, *, eval)
+- Milestone3: A REPL interpreter(when user input (* 1 (+ 2 3)), it prints 5)
+
+- Further milestones (need to break into smaller milestones)
+
+  - Built-in function, quote
+  - Variables, let
+  - Defun and lambda
+  - Strings, I/O (print, read) using terminal
+  - Macros (and quasiquote/unquote)
+
 
 License
 =======
 
-GPL
+GPLv3
 
 
 Thanks
 ======
 
-(coming soon)
+Paweł Marczewski wrote almost codes.
