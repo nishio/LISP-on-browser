@@ -1,50 +1,51 @@
 
 // Parser
 
-// Parse a string. Returns a term, or null if the string is empty
-lisp.parse = function(str) {
-    // We parse by cutting off chunks from the beginning of the input string
-    var input = str;
-
+lisp.Parser = function(str) {
+    // We parse by cutting off chunks of 'input'
+    this.str = str;
+    this.input = str;
+};
+lisp.Parser.prototype = {
     // Return a nice error position description
-    var parseError = function() {
-        var pos = str.length - input.length;
-        var start = str.substr(0, pos);
-        throw 'parse error: ' + start + '<here>' + input;
-    };
+    parseError: function() {
+        var pos = this.str.length - this.input.length;
+        var start = this.str.substr(0, pos);
+        throw 'parse error: ' + start + '<here>' + this.input;
+    },
 
     // Try to parse a given regexp (must be anchored by ^) at the beginning
     // of input. Returns first group, whole match (if no groups) or null
-    var tryConsume = function(re) {
-        var m = re.exec(input);
+    tryConsume: function(re) {
+        var m = re.exec(this.input);
         if (m != null) {
             if (m[0].length > 0)
-                input = input.substr(m[0].length);
+                this.input = this.input.substr(m[0].length);
             return m.length > 1 ? m[1] : m[0];
         } else
             return null;
-    };
+    },
 
-    var deleteSpaces = function() {
-        tryConsume(/^\s+/);
-    };
+    deleteSpaces: function() {
+        this.tryConsume(/^\s+/);
+    },
 
     // Try to parse one term. Return null if we encounter something we don't
     // expect (like ')')
-    var parseOne = function() {
-        deleteSpaces();
+    parseOne: function() {
+        this.deleteSpaces();
 
         // end of input
-        if (input.length == 0)
+        if (this.input.length == 0)
             return null;
 
         // number
-        var s = tryConsume(/^(\d+\.\d*|\d+)/);
+        var s = this.tryConsume(/^(\d+\.\d*|\d+)/);
         if (s != null)
             return new lisp.Number(parseFloat(s));
 
         // symbol/nil
-        var s = tryConsume(/^([^\s\(\)\.0-9][^\s\(\)]*)/);
+        var s = this.tryConsume(/^([^\s\(\)\.0-9][^\s\(\)]*)/);
         if (s != null) {
             s = s.toLowerCase();
             if (s == 'nil')
@@ -54,23 +55,23 @@ lisp.parse = function(str) {
         }
 
         // cons/list - we respect the dot-notation (1 2 . 3)
-        var s = tryConsume(/^(\()/);
+        var s = this.tryConsume(/^(\()/);
         if (s != null) {
             var cdr = lisp.nil;
             var list = [];
             for (;;) {
-                var term = parseOne();
+                var term = this.parseOne();
                 if (term == null) {
-                    var s = tryConsume(/^\./);
+                    var s = this.tryConsume(/^\./);
                     if (s != null) {
-                        cdr = parseOne();
+                        cdr = this.parseOne();
                         if (cdr == null)
-                            parseError();
+                            this.parseError();
                     }
-                    deleteSpaces();
-                    var s = tryConsume(/^\)/);
+                    this.deleteSpaces();
+                    var s = this.tryConsume(/^\)/);
                     if (s == null)
-                        parseError();
+                        this.parseError();
                     break;
                 } else
                     list.push(term);
@@ -82,12 +83,20 @@ lisp.parse = function(str) {
         }
 
         return null;
-    };
+    },
 
-    var term = parseOne();
-    deleteSpaces();
-    if (input.length > 0)
-        parseError();
-    else
-        return term;
+    // Check if the rest of the string is empty
+    ensureEmpty: function() {
+        this.deleteSpaces();
+        if (this.input.length > 0)
+            this.parseError();
+    }
+};
+
+// Parse a string. Returns a term, or null if the string is empty
+lisp.parse = function(str) {
+    var parser = new lisp.Parser(str);
+    var term = parser.parseOne();
+    parser.ensureEmpty();
+    return term;
 };
