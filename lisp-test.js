@@ -28,9 +28,11 @@ lisp.test = function() {
 
         assertEqual(lisp.parse('(if () a 3)').eval().print(), '3');
         assertEqual(lisp.parse('(if 4 5 a)').eval().print(), '5');
+
+        assertEqual(lisp.parse('(eval (quote (+ 2 2)))').eval().print(), '4');
     } catch (err) {
         alert(err);
     }
-}
+};
 
 lisp.test();
