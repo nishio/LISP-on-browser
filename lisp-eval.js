@@ -32,13 +32,8 @@ lisp.Cons.prototype.eval = function() {
     if (this.car.type == 'symbol') {
         var s = this.car.s;
 
-        var verifyArgNum = function(n) {
-            if (args.length != n)
-                throw 'wrong number of arguments for '+ s;
-        };
-
         if (s == 'if') {
-            verifyArgNum(3);
+            lisp.checkNumArgs('if', 3, args);
             var test = args[0].eval();
             if (test.type == 'nil')
                 return args[2].eval();
@@ -47,7 +42,7 @@ lisp.Cons.prototype.eval = function() {
         }
 
         if (s == 'quote') {
-            verifyArgNum(1);
+            lisp.checkNumArgs('quote', 1, args);
             return args[0];
         }
     }
@@ -92,7 +87,6 @@ lisp.env.t = new lisp.Symbol('t');
 lisp.env.t.eval = function() { return this; };
 
 lisp.env.eval = new lisp.Func('eval', function(args) {
-                                  if (args.length != 1)
-                                      throw '1 argument required for eval';
+                                  lisp.checkNumArgs('eval', 1, args);
                                   return args[0].eval();
                               });
