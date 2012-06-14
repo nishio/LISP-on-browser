@@ -6,17 +6,16 @@ lisp.repl_terminal = function(selector) {
             try {
                 var term = lisp.parse(str);
                 if (term != null) {
-                    terminal.echo(term.print());
-                    terminal.echo('');
+                    var result = term.eval();
+                    terminal.echo(result.print());
                 }
             } catch (err) {
                 terminal.error(err);
-                terminal.echo('');
             }
         },
         {
             greetings: "LISP Interpreter. Type 'clear' to clear",
-            prompt: '> ',
+            prompt: '> '
         });
 };
 
