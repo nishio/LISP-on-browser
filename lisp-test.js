@@ -23,6 +23,8 @@ lisp.test = function() {
         assertEqual(lisp.parse('(A B C)').print(), '(a b c)');
         assertEqual(lisp.parse('(1 2 3 . 4)').print(), '(1 2 3 . 4)');
         assertEqual(lisp.parse('(+ . (1 . (2 . (3 . ()))))').print(), '(+ 1 2 3)');
+
+        assertEqual(lisp.parse('(+ 2 (* 3 4) (/ 2 4))').eval().print(), '14.5');
     } catch (err) {
         alert(err);
     }
