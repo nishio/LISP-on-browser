@@ -49,6 +49,11 @@ lisp.checkType = function(term, type) {
         throw 'expected '+type+', got '+term.print();
 };
 
+lisp.checkNumArgs = function(name, n, args) {
+    if (args.length != n)
+        throw 'wrong number of arguments for '+name;
+};
+
 lisp.termToList = function(term) {
     var list = [];
     while (term.type != 'nil') {
