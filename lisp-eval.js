@@ -90,3 +90,11 @@ lisp.env.eval = new lisp.Func('eval', function(args) {
                                   lisp.checkNumArgs('eval', 1, args);
                                   return args[0].eval();
                               });
+
+lisp.env.list = new lisp.Func('list', function(args) {
+                                  return lisp.listToTerm(args);
+                              });
+lisp.env.cons = new lisp.Func('list', function(args) {
+                                  lisp.checkNumArgs('cons', 2, args);
+                                  return new lisp.Cons(args[0], args[1]);
+                              });
