@@ -31,11 +31,12 @@ TODO
 
 - Further milestones (need to break into smaller milestones)
 
-  - Built-in function, quote
+  - quote
+  - Macros (and quasiquote/unquote)
+  - other Built-in function
   - Variables, let
   - Defun and lambda
   - Strings, I/O (print, read) using terminal
-  - Macros (and quasiquote/unquote)
 
 
 License
