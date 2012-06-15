@@ -149,7 +149,7 @@ lisp.makeFuncFromDef = function(env, args, name) {
     var params = lisp.termToList(args[0]);
     for (var i = 0; i < params.length; i++) {
         lisp.checkType(params[i], 'symbol');
-        paramNames = params[i].s;
+        paramNames.push(params[i].s);
     }
 
     return new lisp.Func(
