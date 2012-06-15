@@ -1,7 +1,7 @@
 
 // Evaluation engine
 
-// A lisp function value. run has to be a function(args, env)
+// A lisp function value. run has to be a function(args)
 // (or just a function(args)
 lisp.Func = function(name, run) {
     this.name = name;
@@ -74,15 +74,18 @@ lisp.Cons.prototype.eval = function(env) {
                 vars[name] = value;
             }
 
-            var newEnv = env.extend(vars);
-
             // now evaluate the rest of the form in a new environment
-            var value = lisp.nil;
-            for (var i = 1; i < args.length; i++) {
-                value = args[i].eval(newEnv);
-            }
-            // return the last result
-            return value;
+            var newEnv = env.extend(vars);
+            return lisp.evalList(args, 1, newEnv);
+        }
+
+        case 'do':
+            return lisp.evalList(args, 0, env);
+
+        case 'lambda': {
+            if (args.length == 0)
+                throw 'too few arguments to let';
+            return lisp.makeFuncFromDef(env, args, '(lambda)');
         }
 
         default: // not a special form, do nothing (just proceed)
@@ -95,7 +98,38 @@ lisp.Cons.prototype.eval = function(env) {
     for (var i = 0; i < args.length; ++i)
         args[i] = args[i].eval(env);
 
-    return car.run(args, env);
+    return car.run(args);
+};
+
+lisp.evalList = function(terms, start, env) {
+    var value = lisp.nil;
+    for (var i = start; i < terms.length; i++) {
+        value = terms[i].eval(env);
+    }
+    return value;
+};
+
+// Make a Func from arguments to (defun ...) or (lambda ...)
+lisp.makeFuncFromDef = function(env, args, name) {
+    var paramNames = [];
+    var params = lisp.termToList(args[0]);
+    for (var i = 0; i < params.length; i++) {
+        lisp.checkType(params[i], 'symbol');
+        paramNames = params[i].s;
+    }
+
+    return new lisp.Func(
+        name, function(funcArgs) {
+            // bind the values to param names
+            lisp.checkNumArgs(name, paramNames.length, funcArgs);
+            var vars = {};
+            for (var i = 0; i < paramNames.length; i++)
+                vars[paramNames[i]] = funcArgs[i];
+
+            // now evaluate the function body
+            var newEnv = env.extend(vars);
+            return lisp.evalList(args, 1, newEnv);
+        });
 };
 
 // A basic Lisp variables environment. Make new one using the extend() method

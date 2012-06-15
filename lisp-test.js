@@ -58,6 +58,11 @@ lisp.test = function() {
         assertEval('(let (a 2 b 5) (* a b))', '10');
         assertEval('(let (a 2) (let (a 3) a))', '3');
 
+        assertEval('(do 1 2 3)', '3');
+        assertEval('(do)', 'nil');
+
+        assertEval('(let (f (lambda (x) (+ x 1))) (f 5))', '6');
+        
         lisp.terminal.echo('All tests OK!');
     } catch (err) {
         lisp.terminal.error('test: '+err);
