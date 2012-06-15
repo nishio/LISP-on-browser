@@ -1,4 +1,6 @@
 
+// A lisp function value. run has to be a function(args, env)
+// (or just a function(args)
 lisp.Func = function(name, run) {
     this.name = name;
     this.run = run;
@@ -18,15 +20,15 @@ lisp.nil.eval = function() {
     return this;
 };
 
-lisp.Symbol.prototype.eval = function() {
-    var v = lisp.env.get(this.s);
+lisp.Symbol.prototype.eval = function(env) {
+    var v = env.get(this.s);
     if (v)
         return v;
     else
         throw 'undefined variable: '+this.s;
 };
 
-lisp.Cons.prototype.eval = function() {
+lisp.Cons.prototype.eval = function(env) {
     var args = lisp.termToList(this.cdr);
 
     // check for special forms
@@ -35,11 +37,11 @@ lisp.Cons.prototype.eval = function() {
 
         if (s == 'if') {
             lisp.checkNumArgs('if', 3, args);
-            var test = args[0].eval();
+            var test = args[0].eval(env);
             if (test.type == 'nil')
-                return args[2].eval();
+                return args[2].eval(env);
             else
-                return args[1].eval();
+                return args[1].eval(env);
         }
 
         if (s == 'quote') {
@@ -49,12 +51,12 @@ lisp.Cons.prototype.eval = function() {
     }
 
     // ordinary function
-    var car = this.car.eval();
+    var car = this.car.eval(env);
     lisp.checkType(car, 'function');
     for (var i = 0; i < args.length; ++i)
-        args[i] = args[i].eval();
+        args[i] = args[i].eval(env);
 
-    return car.run(args);
+    return car.run(args, env);
 };
 
 lisp.Func.prototype.eval = function() {
@@ -111,7 +113,7 @@ lisp.env.vars.t.eval = function() { return this; };
 
 lisp.env.vars.eval = new lisp.Func('eval', function(args) {
                                   lisp.checkNumArgs('eval', 1, args);
-                                  return args[0].eval();
+                                  return args[0].eval(lisp.env);
                               });
 
 lisp.env.vars.list = new lisp.Func('list', function(args) {
