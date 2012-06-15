@@ -72,6 +72,10 @@ lisp.test = function() {
         assertEval('(let (a 3) (define (g x) (+ x a)) t)', 't');
         assertEval('(g 5)', '8');
 
+        assertEval('(define x 10)', '10');
+        assertEval('(set! x 11)', '11');
+        assertEval('x', '11');
+
         lisp.env = oldEnv;
         lisp.terminal.echo('All tests OK!');
     } catch (err) {
