@@ -54,6 +54,10 @@ lisp.test = function() {
         assertEval('(= 2 2)', 't');
         assertEval('(/= 2 2)', 'nil');
         assertEval('(< (* 3 5) (* 4 8))', 't');
+
+        assertEval('(let (a 2 b 5) (* a b))', '10');
+        assertEval('(let (a 2) (let (a 3) a))', '3');
+
         lisp.terminal.echo('All tests OK!');
     } catch (err) {
         lisp.terminal.error('test: '+err);

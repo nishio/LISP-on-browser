@@ -35,7 +35,9 @@ lisp.Cons.prototype.eval = function(env) {
     if (this.car.type == 'symbol') {
         var s = this.car.s;
 
-        if (s == 'if') {
+        switch(s) {
+
+        case 'if': {
             lisp.checkNumArgs('if', 3, args);
             var test = args[0].eval(env);
             if (test.type == 'nil')
@@ -44,9 +46,41 @@ lisp.Cons.prototype.eval = function(env) {
                 return args[1].eval(env);
         }
 
-        if (s == 'quote') {
+        case 'quote': {
             lisp.checkNumArgs('quote', 1, args);
             return args[0];
+        }
+
+        case 'let': {
+            if (args.length == 0)
+                throw 'too few arguments to let';
+
+            // first, parse the bindings for let
+            // we expect a list: (name value name value...)
+            var bindings = lisp.termToList(args[0]);
+            if (bindings.length % 2 != 0)
+                throw 'bad bindings format: '+args[0].print();
+
+            var vars = {};
+            for (var i = 0; i < bindings.length; i+=2) {
+                lisp.checkType(bindings[i], 'symbol');
+                var name = bindings[i].s;
+                var value = bindings[i+1].eval(env);
+                vars[name] = value;
+            }
+
+            var newEnv = env.extend(vars);
+
+            // now evaluate the rest of the form in a new environment
+            var value = lisp.nil;
+            for (var i = 1; i < args.length; i++) {
+                value = args[i].eval(newEnv);
+            }
+            // return the last result
+            return value;
+        }
+
+        default: // not a special form, do nothing (just proceed)
         }
     }
 
