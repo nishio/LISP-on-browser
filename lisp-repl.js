@@ -1,7 +1,8 @@
 // REPL - using the jQuery Terminal script
 
-lisp.replTerminal = function(selector) {
-    $(selector).terminal(
+// Install a LISP terminal in a given jQuery element
+lisp.replTerminal = function(elt) {
+    elt.terminal(
         function(str, terminal) {
             try {
                 var term = lisp.parse(str);
@@ -17,6 +18,6 @@ lisp.replTerminal = function(selector) {
             greetings: "LISP Interpreter. Type 'clear' to clear",
             prompt: '> '
         });
-    lisp.terminal = $(selector).terminal();
+    lisp.terminal = elt.terminal();
 };
 
