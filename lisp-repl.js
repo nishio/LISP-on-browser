@@ -17,5 +17,6 @@ lisp.repl_terminal = function(selector) {
             greetings: "LISP Interpreter. Type 'clear' to clear",
             prompt: '> '
         });
+    lisp.terminal = $(selector).terminal();
 };
 
