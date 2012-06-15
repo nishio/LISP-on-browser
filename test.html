@@ -22,8 +22,29 @@
   <div id="term" style="width: 48%; float: left;"></div>
   <div style="width: 48%; float: right;">
     <textarea id="source" style="width: 100%; height: 20em;">
-'(1 2 (3 4
-       6 7))
+;; A few examples. Click 'Load source' to load them.
+
+; Closures
+(let (count 0)
+  (define (counter) (set! count (+ 1 count))))
+
+; You can also define variables
+(define x 2)
+(set! x 3)
+
+; Let
+(let (x 2 y 3) (+ x y))
+
+; Lambda
+(set! x (lambda () 'bla))
+(x)
+
+; Factorial example
+(define (fact n)
+  (if (= n 0)
+      1
+      (* n (fact (- n 1)))))
+(fact 5)
 </textarea>
     <input type="button"  id="load"  value="Load source" />
   </div>
