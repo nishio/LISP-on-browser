@@ -23,15 +23,26 @@ lisp.Parser.prototype = {
         { type: '.', re: /^\./, withEnd: true },
         { type: '\'', re: /^\'/ },
         { type: 'number', re: /^(\.\d+|\d+\.\d*|\d+)/, withEnd: true },
-        { type: 'symbol', re: /^[^\s\(\)]+/, withEnd: true }
+        { type: 'symbol', re: /^[^\s\(\);]+/, withEnd: true }
     ],
 
-    tokenEnd: /^[\(\)\s]/,
+    tokenEnd: /^[\(\)\s;]/,
 
     consumeSpaces: function() {
-        var pos = 0;
-        while (pos < this.input.length && /\s/.test(this.input[pos]))
-            pos++;
+        var inComment = false;
+        for (var pos = 0; pos < this.input.length; pos++) {
+            var c = this.input[pos];
+            if (inComment)
+            {
+                if (c == '\n')
+                    inComment = false;
+            } else {
+                if (c == ';')
+                    inComment = true;
+                else if (/\S/.test(c)) // not a space
+                    break;
+            }
+        }
         if (pos > 0)
             this.input = this.input.substr(pos);
     },
