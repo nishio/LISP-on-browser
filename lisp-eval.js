@@ -234,15 +234,29 @@ lisp.env.vars.eval = new lisp.Func('eval', function(args) {
 
 lisp.tSym = lisp.env.vars.t;
 
-lisp.boolTerm = function(v) { return v ? lisp.tSym : lisp.nil; }
+lisp.boolTerm = function(v) { return v ? lisp.tSym : lisp.nil; };
 
 lisp.env.vars.list = new lisp.Func('list', function(args) {
-                                  return lisp.listToTerm(args);
+                                       return lisp.listToTerm(args);
                               });
-lisp.env.vars.cons = new lisp.Func('list', function(args) {
-                                  lisp.checkNumArgs('cons', 2, args);
-                                  return new lisp.Cons(args[0], args[1]);
+lisp.env.vars.cons = new lisp.Func('cons', function(args) {
+                                       lisp.checkNumArgs('cons', 2, args);
+                                       return new lisp.Cons(args[0], args[1]);
                                    });
+lisp.env.vars.car = new lisp.Func('car', function(args) {
+                                      lisp.checkNumArgs('car', 1, args);
+                                      lisp.checkType(args[0], 'cons');
+                                      return args[0].car;
+                                   });
+lisp.env.vars.cdr = new lisp.Func('cdr', function(args) {
+                                      lisp.checkNumArgs('car', 1, args);
+                                      lisp.checkType(args[0], 'cons');
+                                      return args[0].cdr;
+                                   });
+lisp.env.vars['empty?'] = new lisp.Func('empty?', function(args) {
+                                            lisp.checkNumArgs('empty?', 1, args);
+                                            return lisp.boolTerm(args[0].type == 'nil');
+                                        });
 
 lisp.compareFunc = function(name, func) {
     return new lisp.Func(
