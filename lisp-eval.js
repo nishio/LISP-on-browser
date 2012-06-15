@@ -84,12 +84,12 @@ lisp.Cons.prototype.eval = function(env) {
 
         case 'lambda': {
             if (args.length == 0)
-                throw 'too few arguments to let';
+                throw 'too few arguments to lambda';
             return lisp.makeFuncFromDef(env, args, '(lambda)');
         }
 
         case 'define': {
-            if (args.length < 2)
+            if (args.length == 0)
                 throw 'too few arguments to define';
             if (args[0].type == 'symbol') {
                 // form: (define x ...)
@@ -110,6 +110,16 @@ lisp.Cons.prototype.eval = function(env) {
                 lisp.env.vars[name] = func;
                 return func;
             }
+        }
+
+        case 'set!': {
+            lisp.checkNumArgs('set!', 2, args);
+            lisp.checkType(args[0], 'symbol');
+            var name = args[0].s;
+            var value = args[1].eval(env);
+            if (!env.set(name, value))
+                throw 'undefined variable: '+name;
+            return value;
         }
 
         default: // not a special form, do nothing (just proceed)
@@ -168,6 +178,15 @@ lisp.env = {
         else if (this.parent)
             return this.parent.get(name);
         return null;
+    },
+
+    set: function(name, value) {
+        if (name in this.vars) {
+            this.vars[name] = value;
+            return true;
+        } else if (this.parent)
+            return this.parent.set(name, value);
+        return false;
     },
 
     // make new environment on top of current and return it
