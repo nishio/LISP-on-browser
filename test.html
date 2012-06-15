@@ -45,6 +45,21 @@
       1
       (* n (fact (- n 1)))))
 (fact 5)
+
+; Length example
+(define (length list)
+  (if (empty? list)
+      0
+      (+ 1 (length (cdr list)))))
+(length '(1 2 3))
+
+; Map example
+(define (map func list)
+  (if (empty? list)
+      nil
+      (cons (func (car list))
+            (map func (cdr list)))))
+(map (lambda (x) (+ x 1)) '(1 2 3))
 </textarea>
     <input type="button"  id="load"  value="Load source" />
   </div>
