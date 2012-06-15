@@ -19,8 +19,9 @@ lisp.nil.eval = function() {
 };
 
 lisp.Symbol.prototype.eval = function() {
-    if (this.s in lisp.env)
-        return lisp.env[this.s];
+    var v = lisp.env.get(this.s);
+    if (v)
+        return v;
     else
         throw 'undefined variable: '+this.s;
 };
@@ -74,27 +75,49 @@ lisp.numFunc = function(name, func) {
         });
 };
 
-lisp.env = {};
-lisp.env['+'] = lisp.numFunc('+', function(a,b) { return a+b; });
-lisp.env['-'] = lisp.numFunc('-', function(a,b) { return a-b; });
-lisp.env['*'] = lisp.numFunc('*', function(a,b) { return a*b; });
-lisp.env['/'] = lisp.numFunc('/', function(a,b) {
-                                 if (b == 0)
-                                     throw 'division by zero';
-                                 else
-                                     return a/b; });
-lisp.env.t = new lisp.Symbol('t');
-lisp.env.t.eval = function() { return this; };
+// A basic Lisp variables environment. Make new one using the extend() method
+lisp.env = {
+    vars: {},
+    parent: null,
 
-lisp.env.eval = new lisp.Func('eval', function(args) {
+    // variable lookup
+    get: function(name) {
+        if (name in this.vars)
+            return this.vars[name];
+        else if (this.parent)
+            return this.parent.get(name);
+        return null;
+    },
+
+    // make new environment on top of current and return it
+    extend: function(vars) {
+        return {
+            __proto__: lisp.env,
+            vars: vars,
+            parent: this
+        };
+    }
+};
+lisp.env.vars['+'] = lisp.numFunc('+', function(a,b) { return a+b; });
+lisp.env.vars['-'] = lisp.numFunc('-', function(a,b) { return a-b; });
+lisp.env.vars['*'] = lisp.numFunc('*', function(a,b) { return a*b; });
+lisp.env.vars['/'] = lisp.numFunc('/', function(a,b) {
+                                      if (b == 0)
+                                          throw 'division by zero';
+                                      else
+                                          return a/b; });
+lisp.env.vars.t = new lisp.Symbol('t');
+lisp.env.vars.t.eval = function() { return this; };
+
+lisp.env.vars.eval = new lisp.Func('eval', function(args) {
                                   lisp.checkNumArgs('eval', 1, args);
                                   return args[0].eval();
                               });
 
-lisp.env.list = new lisp.Func('list', function(args) {
+lisp.env.vars.list = new lisp.Func('list', function(args) {
                                   return lisp.listToTerm(args);
                               });
-lisp.env.cons = new lisp.Func('list', function(args) {
+lisp.env.vars.cons = new lisp.Func('list', function(args) {
                                   lisp.checkNumArgs('cons', 2, args);
                                   return new lisp.Cons(args[0], args[1]);
                               });
@@ -105,13 +128,13 @@ lisp.compareFunc = function(name, func) {
             lisp.checkNumArgs(name, 2, args);
             lisp.checkType(args[0], 'number');
             lisp.checkType(args[1], 'number');
-            return func(args[0].n, args[1].n) ? lisp.env.t : lisp.nil;
+            return func(args[0].n, args[1].n) ? lisp.env.vars.t : lisp.nil;
         });
 };
 
-lisp.env['=']  = lisp.compareFunc('=',  function(a,b) { return a == b; });
-lisp.env['/='] = lisp.compareFunc('/=', function(a,b) { return a != b; });
-lisp.env['>']  = lisp.compareFunc('>',  function(a,b) { return a > b; });
-lisp.env['>='] = lisp.compareFunc('>=', function(a,b) { return a >= b; });
-lisp.env['<']  = lisp.compareFunc('<',  function(a,b) { return a < b; });
-lisp.env['<='] = lisp.compareFunc('<=', function(a,b) { return a <= b; });
+lisp.env.vars['=']  = lisp.compareFunc('=',  function(a,b) { return a == b; });
+lisp.env.vars['/='] = lisp.compareFunc('/=', function(a,b) { return a != b; });
+lisp.env.vars['>']  = lisp.compareFunc('>',  function(a,b) { return a > b; });
+lisp.env.vars['>='] = lisp.compareFunc('>=', function(a,b) { return a >= b; });
+lisp.env.vars['<']  = lisp.compareFunc('<',  function(a,b) { return a < b; });
+lisp.env.vars['<='] = lisp.compareFunc('<=', function(a,b) { return a <= b; });
