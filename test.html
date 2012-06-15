@@ -11,7 +11,7 @@
   <link rel="stylesheet" type="text/css" href="terminal.css" />
   <script>
     $(function() {
-          lisp.replTerminal('#term');
+          lisp.replTerminal($('#term'));
           lisp.test();
           $('body').click(function() { $('#term').terminal().disable(); });
     });
