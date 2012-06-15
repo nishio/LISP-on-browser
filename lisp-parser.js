@@ -14,91 +14,137 @@ lisp.Parser.prototype = {
         throw 'parse error: ' + start + '<here>' + this.input;
     },
 
-    // Try to parse a given regexp (must be anchored by ^) at the beginning
-    // of input. Returns first group, whole match (if no groups) or null
-    tryConsume: function(re) {
-        var m = re.exec(this.input);
-        if (m != null) {
-            if (m[0].length > 0)
-                this.input = this.input.substr(m[0].length);
-            return m.length > 1 ? m[1] : m[0];
-        } else
-            return null;
+    // Token types, and regexps used to match them.
+    // withEnd=true means that we require a space (or non-atom) immediately
+    // after the token
+    tokenTypes: [
+        { type: '(', re: /^\(/ },
+        { type: ')', re: /^\)/ },
+        { type: '.', re: /^\./, withEnd: true },
+        { type: '\'', re: /^\'/ },
+        { type: 'number', re: /^(\.\d+|\d+\.\d*|\d+)/, withEnd: true },
+        { type: 'symbol', re: /^[^\s\(\)]+/, withEnd: true }
+    ],
+
+    tokenEnd: /^[\(\)\s]/,
+
+    consumeSpaces: function() {
+        var pos = 0;
+        while (pos < this.input.length && /\s/.test(this.input[pos]))
+            pos++;
+        if (pos > 0)
+            this.input = this.input.substr(pos);
     },
 
-    deleteSpaces: function() {
-        this.tryConsume(/^\s+/);
-    },
-
-    // Try to parse one term. Return null if we encounter something we don't
-    // expect (like ')')
-    parseOne: function() {
-        this.deleteSpaces();
-
-        // end of input
+    // Read a single token. Return null on end of input
+    readToken: function() {
+        this.consumeSpaces();
         if (this.input.length == 0)
             return null;
 
-        // number
-        var s = this.tryConsume(/^(\d+\.\d*|\d+)/);
-        if (s != null)
-            return new lisp.Number(parseFloat(s));
+        for (var i = 0; i < this.tokenTypes.length; ++i) {
+            var t = this.tokenTypes[i];
 
-        // apostrophe (quote)
-        var s = this.tryConsume(/^(\')/);
-        if (s != null) {
-            var term = this.parseOne();
-            if (term == null)
-                this.parseError();
-            return new lisp.Cons(
-                new lisp.Symbol('quote'),
-                new lisp.Cons(
-                    term,
-                    lisp.nil));
+            var m = t.re.exec(this.input);
+            if (m == null)
+                continue;
+
+            var n = m[0].length;
+
+            // do we require a non-atom after this token?
+            if (t.withEnd)
+                if (!(n == this.input.length || this.tokenEnd.test(this.input[n])))
+                    continue;
+
+            this.input = this.input.substr(n);
+            return { type: t.type, s: m[0] };
         }
+        this.parseError();
+    },
 
+    // Push a token back to input
+    unreadToken: function(token) {
+        this.input = token.s + this.input;
+    },
 
-        // symbol/nil
-        var s = this.tryConsume(/^([^\s\(\)\.0-9][^\s\(\)]*)/);
-        if (s != null) {
-            s = s.toLowerCase();
-            if (s == 'nil')
-                return lisp.nil;
-            else
-                return new lisp.Symbol(s);
-        }
+    empty: function() {
+        return this.input.length == 0;
+    },
 
-        // cons/list - we respect the dot-notation (1 2 . 3)
-        var s = this.tryConsume(/^(\()/);
-        if (s != null) {
-            var cdr = lisp.nil;
-            var list = [];
-            for (;;) {
-                var term = this.parseOne();
-                if (term == null) {
-                    var s = this.tryConsume(/^\./);
-                    if (s != null) {
-                        cdr = this.parseOne();
-                        if (cdr == null)
-                            this.parseError();
-                    }
-                    this.deleteSpaces();
-                    var s = this.tryConsume(/^\)/);
-                    if (s == null)
-                        this.parseError();
-                    break;
-                } else
-                    list.push(term);
+    // Try to parse one term. Returns a lisp term on success, null on end of input
+    // or unexpected input
+    readTerm: function() {
+        var tok = this.readToken();
+        if (tok == null) // end of input
+            return null;
+
+        switch (tok.type) {
+        case 'number':
+            return new lisp.Number(parseFloat(tok.s));
+
+        case 'symbol':
+            {
+                var s = tok.s.toLowerCase();
+                if (s == 'nil')
+                    return lisp.nil;
+                else
+                    return new lisp.Symbol(s);
             }
-            return lisp.listToTerm(list, cdr);
-        }
 
-        return null;
+        case '\'': // quote
+            {
+                var term = this.readTerm();
+                if (term == null)
+                    this.parseError();
+                return new lisp.Cons(
+                    new lisp.Symbol('quote'),
+                    new lisp.Cons(
+                        term,
+                        lisp.nil));
+            }
+
+        case '(':
+            // cons/list - we respect the dot-notation (1 2 . 3)
+            {
+                var cdr = lisp.nil;
+                var list = [];
+                for (;;) {
+                    var term = this.readTerm();
+                    if (term != null) {
+                        list.push(term);
+                    } else {
+                        // end of list
+                        var tok = this.readToken();
+                        if (tok == null)
+                            this.parseError();
+
+                        // first check for '. term'
+                        if (tok.type == '.') {
+                            cdr = this.readTerm();
+                            if (cdr == null)
+                                this.parseError();
+                            tok = this.readToken();
+                            if (tok == null)
+                                this.parseError();
+                        }
+
+                        // then check for ')'
+                        if (tok.type != ')')
+                            this.parseError();
+                        return lisp.listToTerm(list, cdr);
+                    }
+                } // for
+            } // case
+
+        default:
+            this.unreadToken(tok);
+            return null;
+        } // switch
     },
 
     // Check if the rest of the string is empty
     ensureEmpty: function() {
-        this.deleteSpaces();
+        this.consumeSpaces();
         if (this.input.length > 0)
             this.parseError();
     }
@@ -107,7 +153,7 @@ lisp.Parser.prototype = {
 // Parse a string. Returns a term, or null if the string is empty
 lisp.parse = function(str) {
     var parser = new lisp.Parser(str);
-    var term = parser.parseOne();
+    var term = parser.readTerm();
     parser.ensureEmpty();
     return term;
 };
