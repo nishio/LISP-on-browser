@@ -58,6 +58,11 @@ lisp.test = function() {
         assertEval('(/= 2 2)', 'nil');
         assertEval('(< (* 3 5) (* 4 8))', 't');
 
+        assertEval('(car \'(1 2 3))', '1');
+        assertEval('(cdr \'(1 2 3))', '(2 3)');
+        assertEval('(empty? ())', 't');
+        assertEval('(empty? \'(1 2 3))', 'nil');
+
         assertEval('(let (a 2 b 5) (* a b))', '10');
         assertEval('(let (a 2) (let (a 3) a))', '3');
 
