@@ -88,6 +88,30 @@ lisp.Cons.prototype.eval = function(env) {
             return lisp.makeFuncFromDef(env, args, '(lambda)');
         }
 
+        case 'define': {
+            if (args.length < 2)
+                throw 'too few arguments to define';
+            if (args[0].type == 'symbol') {
+                // form: (define x ...)
+                var name = args[0].s;
+                var value = lisp.evalList(args, 1, env);
+                lisp.env.vars[name] = value;
+                return value;
+            } else {
+                // form: (define (f ...) ...)
+                lisp.checkType(args[0], 'cons');
+                lisp.checkType(args[0].car, 'symbol');
+
+                var name = args[0].car.s;
+                // pop the name from args[0]
+                args[0] = args[0].cdr;
+
+                var func = lisp.makeFuncFromDef(env, args, name);
+                lisp.env.vars[name] = func;
+                return func;
+            }
+        }
+
         default: // not a special form, do nothing (just proceed)
         }
     }
@@ -180,13 +204,16 @@ lisp.env.vars['/'] = lisp.numFunc('/', function(a,b) {
                                           throw 'division by zero';
                                       else
                                           return a/b; });
+
 lisp.env.vars.t = new lisp.Symbol('t');
 lisp.env.vars.t.eval = function() { return this; };
 
 lisp.env.vars.eval = new lisp.Func('eval', function(args) {
-                                  lisp.checkNumArgs('eval', 1, args);
-                                  return args[0].eval(lisp.env);
-                              });
+                                       lisp.checkNumArgs('eval', 1, args);
+                                       return args[0].eval(lisp.env);
+                                   });
+
+lisp.tSym = lisp.env.vars.t;
 
 lisp.env.vars.list = new lisp.Func('list', function(args) {
                                   return lisp.listToTerm(args);
@@ -202,7 +229,7 @@ lisp.compareFunc = function(name, func) {
             lisp.checkNumArgs(name, 2, args);
             lisp.checkType(args[0], 'number');
             lisp.checkType(args[1], 'number');
-            return func(args[0].n, args[1].n) ? lisp.env.vars.t : lisp.nil;
+            return func(args[0].n, args[1].n) ? lisp.tSym : lisp.nil;
         });
 };
 

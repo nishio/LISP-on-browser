@@ -20,6 +20,9 @@ function assertEval(s1, s2) {
 lisp.test = function() {
     lisp.terminal.echo('Running tests...');
     try {
+        var oldEnv = lisp.env;
+        lisp.env = lisp.env.extend({});
+
         var num = new lisp.Number(5);
         var sym = new lisp.Symbol('bla');
         assertEqual(num.print(), '5');
@@ -62,7 +65,14 @@ lisp.test = function() {
         assertEval('(do)', 'nil');
 
         assertEval('(let (f (lambda (x) (+ x 1))) (f 5))', '6');
-        
+
+        assertEval('(do (define (f x) (+ x 1)) t)', 't');
+        assertEval('(f 5)', '6');
+
+        assertEval('(let (a 3) (define (g x) (+ x a)) t)', 't');
+        assertEval('(g 5)', '8');
+
+        lisp.env = oldEnv;
         lisp.terminal.echo('All tests OK!');
     } catch (err) {
         lisp.terminal.error('test: '+err);
