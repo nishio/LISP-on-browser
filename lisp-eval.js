@@ -234,13 +234,15 @@ lisp.env.vars.eval = new lisp.Func('eval', function(args) {
 
 lisp.tSym = lisp.env.vars.t;
 
+lisp.boolTerm = function(v) { return v ? lisp.tSym : lisp.nil; }
+
 lisp.env.vars.list = new lisp.Func('list', function(args) {
                                   return lisp.listToTerm(args);
                               });
 lisp.env.vars.cons = new lisp.Func('list', function(args) {
                                   lisp.checkNumArgs('cons', 2, args);
                                   return new lisp.Cons(args[0], args[1]);
-                              });
+                                   });
 
 lisp.compareFunc = function(name, func) {
     return new lisp.Func(
@@ -248,9 +250,11 @@ lisp.compareFunc = function(name, func) {
             lisp.checkNumArgs(name, 2, args);
             lisp.checkType(args[0], 'number');
             lisp.checkType(args[1], 'number');
-            return func(args[0].n, args[1].n) ? lisp.tSym : lisp.nil;
+            return lisp.boolTerm(func(args[0].n, args[1].n));
         });
 };
+
+
 
 lisp.env.vars['=']  = lisp.compareFunc('=',  function(a,b) { return a == b; });
 lisp.env.vars['/='] = lisp.compareFunc('/=', function(a,b) { return a != b; });
