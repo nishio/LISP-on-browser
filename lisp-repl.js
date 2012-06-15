@@ -1,6 +1,6 @@
 // REPL - using the jQuery Terminal script
 
-lisp.repl_terminal = function(selector) {
+lisp.replTerminal = function(selector) {
     $(selector).terminal(
         function(str, terminal) {
             try {
