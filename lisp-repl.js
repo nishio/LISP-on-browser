@@ -21,3 +21,26 @@ lisp.replTerminal = function(elt) {
     lisp.terminal = elt.terminal();
 };
 
+// Clicking 'button' will load 'source' to the interpreter
+lisp.replLoader = function(source, button) {
+    button.click(
+        function() {
+            lisp.terminal.echo('Loading source...');
+            var parser = new lisp.Parser(source.val());
+            try {
+                while (!parser.empty()) {
+                    var term = parser.readTerm();
+                    if (term != null) {
+                        var result = term.eval();
+                        lisp.terminal.echo(result.print());
+                    } else { // term == null
+                        if (!parser.empty())
+                            parser.parseError();
+                    }
+                }
+            } catch(err) {
+                console.log(err);
+                lisp.terminal.error(err);
+            }
+        });
+};

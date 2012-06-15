@@ -12,6 +12,7 @@
   <script>
     $(function() {
           lisp.replTerminal($('#term'));
+          lisp.replLoader($('#source'), $('#load'));
           lisp.test();
           $('body').click(function() { $('#term').terminal().disable(); });
     });
