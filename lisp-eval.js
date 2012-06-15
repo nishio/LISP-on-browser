@@ -98,3 +98,20 @@ lisp.env.cons = new lisp.Func('list', function(args) {
                                   lisp.checkNumArgs('cons', 2, args);
                                   return new lisp.Cons(args[0], args[1]);
                               });
+
+lisp.compareFunc = function(name, func) {
+    return new lisp.Func(
+        name, function(args) {
+            lisp.checkNumArgs(name, 2, args);
+            lisp.checkType(args[0], 'number');
+            lisp.checkType(args[1], 'number');
+            return func(args[0].n, args[1].n) ? lisp.env.t : lisp.nil;
+        });
+};
+
+lisp.env['=']  = lisp.compareFunc('=',  function(a,b) { return a == b; });
+lisp.env['/='] = lisp.compareFunc('/=', function(a,b) { return a != b; });
+lisp.env['>']  = lisp.compareFunc('>',  function(a,b) { return a > b; });
+lisp.env['>='] = lisp.compareFunc('>=', function(a,b) { return a >= b; });
+lisp.env['<']  = lisp.compareFunc('<',  function(a,b) { return a < b; });
+lisp.env['<='] = lisp.compareFunc('<=', function(a,b) { return a <= b; });

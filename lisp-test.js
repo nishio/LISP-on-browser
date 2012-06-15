@@ -45,6 +45,10 @@ lisp.test = function() {
         assertEval('(list)', 'nil');
         assertEval('(list (+ 2 2) 3)', '(4 3)');
         assertEval('(cons (cons 2 3) (cons 4 nil))', '((2 . 3) 4)');
+
+        assertEval('(= 2 2)', 't');
+        assertEval('(/= 2 2)', 'nil');
+        assertEval('(< (* 3 5) (* 4 8))', 't');
     } catch (err) {
         alert(err);
     }
