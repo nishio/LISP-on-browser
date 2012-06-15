@@ -10,7 +10,10 @@
   <script src="lisp-test.js"></script>
   <link rel="stylesheet" type="text/css" href="terminal.css" />
   <script>
-    $(function() { lisp.repl_terminal('#term'); });
+    $(function() {
+          lisp.repl_terminal('#term');
+          lisp.test();
+    });
   </script>
 </head>
 <body>

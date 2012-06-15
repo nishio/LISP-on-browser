@@ -18,6 +18,7 @@ function assertEval(s1, s2) {
 };
 
 lisp.test = function() {
+    lisp.terminal.echo('Running tests...');
     try {
         var num = new lisp.Number(5);
         var sym = new lisp.Symbol('bla');
@@ -53,9 +54,8 @@ lisp.test = function() {
         assertEval('(= 2 2)', 't');
         assertEval('(/= 2 2)', 'nil');
         assertEval('(< (* 3 5) (* 4 8))', 't');
+        lisp.terminal.echo('All tests OK!');
     } catch (err) {
-        alert(err);
+        lisp.terminal.error('test: '+err);
     }
 };
-
-lisp.test();
