@@ -1,4 +1,6 @@
 
+// Evaluation engine
+
 // A lisp function value. run has to be a function(args, env)
 // (or just a function(args)
 lisp.Func = function(name, run) {
@@ -9,6 +11,9 @@ lisp.Func.prototype = {
     type: 'function',
     print: function() {
         return '<function '+ this.name+ '>';
+    },
+    eval: function() {
+        throw 'trying to evaluate '+this.print()+' again';
     }
 };
 
@@ -93,24 +98,6 @@ lisp.Cons.prototype.eval = function(env) {
     return car.run(args, env);
 };
 
-lisp.Func.prototype.eval = function() {
-    throw 'trying to evaluate '+this.print()+' again';
-};
-
-lisp.numFunc = function(name, func) {
-    return new lisp.Func(
-        name, function(args) {
-            if (args.length == 0)
-                throw 'too few arguments to '+name;
-            var n = args[0].n;
-            for (var i = 1; i < args.length; i++) {
-                lisp.checkType(args[i], 'number');
-                n = func(n, args[i].n);
-            }
-            return new lisp.Number(n);
-        });
-};
-
 // A basic Lisp variables environment. Make new one using the extend() method
 lisp.env = {
     vars: {},
@@ -134,6 +121,23 @@ lisp.env = {
         };
     }
 };
+
+// Builtin functions
+
+lisp.numFunc = function(name, func) {
+    return new lisp.Func(
+        name, function(args) {
+            if (args.length == 0)
+                throw 'too few arguments to '+name;
+            var n = args[0].n;
+            for (var i = 1; i < args.length; i++) {
+                lisp.checkType(args[i], 'number');
+                n = func(n, args[i].n);
+            }
+            return new lisp.Number(n);
+        });
+};
+
 lisp.env.vars['+'] = lisp.numFunc('+', function(a,b) { return a+b; });
 lisp.env.vars['-'] = lisp.numFunc('-', function(a,b) { return a-b; });
 lisp.env.vars['*'] = lisp.numFunc('*', function(a,b) { return a*b; });
