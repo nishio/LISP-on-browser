@@ -26,14 +26,26 @@ TODO
   - given string such like "(* 1 (+ 2 3))" and return syntax trees
   - in this point forget about reader macros such as "'(1 2 3)"
 
-- Milestone2: Some Built-in function (+, *, eval)
-- Milestone3: A REPL interpreter(when user input (* 1 (+ 2 3)), it prints 5)
+- (done)Milestone2: Some Built-in function
+
+  - arithmetic functions: +, -, *, /
+  - other functions: eval, cons, list
+
+- (done)Milestone3: A REPL interpreter(when user input (* 1 (+ 2 3)), it prints 5)
+- (done)Milestone4: Special forms: quote and if
+- (done)Milestone5: Reader syntax with apostrophe: '(+ 2 2) = (quote (+ 2 2))
+
+- Next milestones:
+
+  - equality and comparison: =, /=, <, etc.
+  - lexical scope (let and variables)
+  - defining your own functions (defun)
+  - comments in the code
+  - a textbox for loading examples into interpreter
 
 - Further milestones (need to break into smaller milestones)
 
-  - Built-in function, quote
-  - Variables, let
-  - Defun and lambda
+  - Macros (and quasiquote/unquote)
   - Strings, I/O (print, read) using terminal
   - Macros (and quasiquote/unquote)
 
