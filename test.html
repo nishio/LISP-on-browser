@@ -63,6 +63,16 @@
       (cons (func (car list))
             (map func (cdr list)))))
 (map (lambda (x) (+ x 1)) '(1 2 3))
+
+; And macro example
+(defmacro (and x . xs)
+  (if (empty? xs)
+      x
+      `(when ,x (and . ,xs))))
+(expand-code '(and a b c d))
+; and to demonstrate the short-circuit mechanism:
+; ((unknown) should crash when run)
+(and (= 2 2) (= 2 3) (unknown))
 </textarea>
     <input type="button" id="clear" value="Clear terminal" />
     <input type="button" id="load" value="Load source" />
