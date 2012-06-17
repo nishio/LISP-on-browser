@@ -98,8 +98,8 @@ lisp.test = function() {
                    '(1 2 (3 4))');
 
         assertEval('(defmacro (foo x) (list \'+ x x))', 'foo');
-        assertEval('(macroexpand-1 \'(foo bar))', '(+ bar bar)');
-        assertEval('(macroexpand-1 \'(+ 2 (foo bar)))', '(+ 2 (+ bar bar))');
+        assertEval('(expand-code-1 \'(foo bar))', '(+ bar bar)');
+        assertEval('(expand-code-1 \'(+ 2 (foo bar)))', '(+ 2 (+ bar bar))');
 
         assertEval('(* (foo 2) (foo 3))', '24');
 
@@ -107,7 +107,7 @@ lisp.test = function() {
                    + '(if (empty? xs) x '
                    + '  (list \'+ x (cons \'plus xs))))',
                    'plus');
-        assertEval('(macroexpand \'(plus a b c d))', '(+ a (+ b (+ c d)))');
+        assertEval('(expand-code \'(plus a b c d))', '(+ a (+ b (+ c d)))');
 
         assertEval('(- (plus 1 2 3))', '-6');
 
