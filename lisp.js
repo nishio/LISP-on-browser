@@ -26,6 +26,17 @@ lisp.Cons = function(car, cdr) {
 lisp.Cons.prototype = {
     type: 'cons',
     print: function() {
+        if (this.car.type == 'symbol' &&
+            this.cdr.type == 'cons' &&
+            this.cdr.cdr.type == 'nil') // one-argument form
+        {
+            var s = this.car.s;
+            var arg = this.cdr.car;
+
+            if (s == 'quote')
+                return "'" + arg.print();
+        }
+
         var s = '(' + this.car.print();
         var rest = this.cdr;
         while (rest.type == 'cons') {
