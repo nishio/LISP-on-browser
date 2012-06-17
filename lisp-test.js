@@ -81,6 +81,9 @@ lisp.test = function() {
         assertEval('(set! x 11)', '11');
         assertEval('x', '11');
 
+        assertEval('(let (f (lambda (x y . z) (list x y z))) (f 1 2 3 4))',
+                   '(1 2 (3 4))');
+
         lisp.env = oldEnv;
         lisp.terminal.echo('All tests OK!');
     } catch (err) {
