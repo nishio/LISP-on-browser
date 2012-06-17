@@ -41,8 +41,9 @@ lisp.test = function() {
         assertParse('a;b', 'a');
         assertParse('(a;b\nc)', '(a c)');
 
-        assertParse("'(+ 2 2)", '(quote (+ 2 2))');
-        assertParse("'A", '(quote a)');
+        assertParse("'(+ 2 2)", "'(+ 2 2)");
+        assertParse("'A", "'a");
+        assertEval("(car ''A)", 'quote');
         assertEval("'(+ 2 2)", '(+ 2 2)');
 
         assertEval('(+ 2 (* 3 4) (/ 2 4))', '14.5');
