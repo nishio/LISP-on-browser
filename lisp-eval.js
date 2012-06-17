@@ -33,9 +33,6 @@ lisp.Symbol.prototype.eval = function(env) {
         throw 'undefined variable: '+this.s;
 };
 
-lisp.specialNames = ['if', 'quote', 'let',
-                     'do', 'lambda', 'define', 'set!'];
-
 lisp.Cons.prototype.eval = function(env) {
     var args = lisp.termToList(this.cdr);
 
@@ -91,11 +88,14 @@ lisp.Cons.prototype.eval = function(env) {
             return lisp.makeFuncFromDef(env, args, '(lambda)');
         }
 
-        case 'define': {
+        case 'define':
+        case 'defmacro': {
             if (args.length == 0)
-                throw 'too few arguments to define';
+                throw 'too few arguments to '+s;
             if (args[0].type == 'symbol') {
                 // form: (define x ...)
+                if (s == 'defmacro')
+                    throw 'symbol macros are not supported';
                 var name = args[0].s;
                 var value = lisp.evalList(args, 1, env);
                 lisp.env.vars[name] = value;
@@ -110,8 +110,13 @@ lisp.Cons.prototype.eval = function(env) {
                 args[0] = args[0].cdr;
 
                 var func = lisp.makeFuncFromDef(env, args, name);
-                lisp.env.vars[name] = func;
-                return func;
+                if (s == 'define') {
+                    lisp.env.vars[name] = func;
+                    return func;
+                } else {
+                    lisp.macros[name] = func;
+                    return new lisp.Symbol(name);
+                }
             }
         }
 

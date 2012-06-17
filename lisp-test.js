@@ -89,6 +89,10 @@ lisp.test = function() {
         assertEval('(let (f (lambda (x y . z) (list x y z))) (f 1 2 3 4))',
                    '(1 2 (3 4))');
 
+        assertEval('(defmacro (foo x) (list \'+ x x))', 'foo');
+        assertEval('(macroexpand-1 \'(foo bar))', '(+ bar bar)');
+        assertEval('(macroexpand-1 \'(+ 2 (foo bar)))', '(+ 2 (+ bar bar))');
+
         lisp.env = oldEnv;
         lisp.terminal.echo('All tests OK!');
     } catch (err) {
