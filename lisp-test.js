@@ -14,7 +14,8 @@ function assertParse(s1, s2) {
 };
 
 function assertEval(s1, s2) {
-    assertEqual(lisp.parse(s1).eval(lisp.env).print(), s2);
+    assertEqual(lisp.evalCode(lisp.parse(s1),
+                              lisp.env).print(), s2);
 };
 
 lisp.test = function() {
@@ -93,11 +94,15 @@ lisp.test = function() {
         assertEval('(macroexpand-1 \'(foo bar))', '(+ bar bar)');
         assertEval('(macroexpand-1 \'(+ 2 (foo bar)))', '(+ 2 (+ bar bar))');
 
+        assertEval('(* (foo 2) (foo 3))', '24');
+
         assertEval('(defmacro (plus x . xs) '
                    + '(if (empty? xs) x '
                    + '  (list \'+ x (cons \'plus xs))))',
                    'plus');
         assertEval('(macroexpand \'(plus a b c d))', '(+ a (+ b (+ c d)))');
+
+        assertEval('(- (plus 1 2 3))', '-6');
 
         lisp.env = oldEnv;
         lisp.terminal.echo('All tests OK!');
