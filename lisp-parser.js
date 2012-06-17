@@ -22,7 +22,7 @@ lisp.Parser.prototype = {
         { type: ')', re: /^\)/ },
         { type: '.', re: /^\./, withEnd: true },
         { type: '\'', re: /^\'/ },
-        { type: 'number', re: /^(\.\d+|\d+\.\d*|\d+)/, withEnd: true },
+        { type: 'number', re: /^-?(\.\d+|\d+\.\d*|\d+)/, withEnd: true },
         { type: 'symbol', re: /^[^\s\(\);]+/, withEnd: true }
     ],
 
