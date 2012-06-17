@@ -113,19 +113,22 @@ lisp.env.vars['>='] = lisp.compareFunc('>=', function(a,b) { return a >= b; });
 lisp.env.vars['<']  = lisp.compareFunc('<',  function(a,b) { return a < b; });
 lisp.env.vars['<='] = lisp.compareFunc('<=', function(a,b) { return a <= b; });
 
-lisp.env.vars['macroexpand-1'] =
-    new lisp.Func('macroexpand-1',
+// We don't use the name 'macroexpand' because the functions expand all code,
+// not only the top-level form (unlike Common Lisp's MACROEXPAND).
+
+lisp.env.vars['expand-code-1'] =
+    new lisp.Func('expand-code-1',
                   function(args) {
-                      lisp.checkNumArgs('macroexpand-1', 1, args);
+                      lisp.checkNumArgs('expand-code-1', 1, args);
                       var result = lisp.macroExpandOne(args[0], true);
                       if (result == null)
                           return args[0];
                       return result;
                   });
 
-lisp.env.vars['macroexpand'] =
+lisp.env.vars['expand-code'] =
     new lisp.Func('macroexpand',
                   function(args) {
-                      lisp.checkNumArgs('macroexpand', 1, args);
+                      lisp.checkNumArgs('expand-code', 1, args);
                       return lisp.macroExpand(args[0]);
                   });
