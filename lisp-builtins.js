@@ -112,3 +112,13 @@ lisp.env.vars['>']  = lisp.compareFunc('>',  function(a,b) { return a > b; });
 lisp.env.vars['>='] = lisp.compareFunc('>=', function(a,b) { return a >= b; });
 lisp.env.vars['<']  = lisp.compareFunc('<',  function(a,b) { return a < b; });
 lisp.env.vars['<='] = lisp.compareFunc('<=', function(a,b) { return a <= b; });
+
+lisp.env.vars['macroexpand-1'] =
+    new lisp.Func('macroexpand-1',
+                  function(args) {
+                      lisp.checkNumArgs('macroexpand-1', 1, args);
+                      var result = lisp.macroExpandOne(args[0], true);
+                      if (result == null)
+                          return args[0];
+                      return result;
+                  });
