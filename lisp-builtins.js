@@ -122,3 +122,10 @@ lisp.env.vars['macroexpand-1'] =
                           return args[0];
                       return result;
                   });
+
+lisp.env.vars['macroexpand'] =
+    new lisp.Func('macroexpand',
+                  function(args) {
+                      lisp.checkNumArgs('macroexpand', 1, args);
+                      return lisp.macroExpand(args[0]);
+                  });

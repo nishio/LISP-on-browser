@@ -93,6 +93,12 @@ lisp.test = function() {
         assertEval('(macroexpand-1 \'(foo bar))', '(+ bar bar)');
         assertEval('(macroexpand-1 \'(+ 2 (foo bar)))', '(+ 2 (+ bar bar))');
 
+        assertEval('(defmacro (plus x . xs) '
+                   + '(if (empty? xs) x '
+                   + '  (list \'+ x (cons \'plus xs))))',
+                   'plus');
+        assertEval('(macroexpand \'(plus a b c d))', '(+ a (+ b (+ c d)))');
+
         lisp.env = oldEnv;
         lisp.terminal.echo('All tests OK!');
     } catch (err) {

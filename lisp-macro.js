@@ -37,3 +37,10 @@ lisp.macroExpandOne = function(term, hasHead) {
 
     return null;
 };
+
+lisp.macroExpand = function(term) {
+    var newTerm;
+    while ((newTerm = lisp.macroExpandOne(term, true)) != null)
+        term = newTerm;
+    return term;
+};
