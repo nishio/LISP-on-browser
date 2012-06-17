@@ -26,6 +26,24 @@ lisp.Cons = function(car, cdr) {
 lisp.Cons.prototype = {
     type: 'cons',
     print: function() {
+        if (this.car.type == 'symbol' &&
+            this.cdr.type == 'cons' &&
+            this.cdr.cdr.type == 'nil') // one-argument form
+        {
+            var s = this.car.s;
+            var arg = this.cdr.car;
+
+            switch (s) {
+            case 'quote':
+                return "'" + arg.print();
+            case 'quasiquote':
+                return '`' + arg.print();
+            case 'unquote':
+                return ',' + arg.print();
+            default: // fall through
+            }
+        }
+
         var s = '(' + this.car.print();
         var rest = this.cdr;
         while (rest.type == 'cons') {
@@ -71,4 +89,11 @@ lisp.listToTerm = function(list, start) {
     for (var i = list.length-1; i >= 0; i--)
         result = new lisp.Cons(list[i], result);
     return result;
+};
+
+// Construct a simple form (s arg)
+lisp.form1 = function(s, arg) {
+    return new lisp.Cons(new lisp.Symbol(s),
+                         new lisp.Cons(arg,
+                                       lisp.nil));
 };
