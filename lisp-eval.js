@@ -33,6 +33,9 @@ lisp.Symbol.prototype.eval = function(env) {
         throw 'undefined variable: '+this.s;
 };
 
+lisp.specialNames = ['if', 'quote', 'let',
+                     'do', 'lambda', 'define', 'set!'];
+
 lisp.Cons.prototype.eval = function(env) {
     var args = lisp.termToList(this.cdr);
 
@@ -146,19 +149,39 @@ lisp.evalList = function(terms, start, env) {
 // Make a Func from arguments to (defun ...) or (lambda ...)
 lisp.makeFuncFromDef = function(env, args, name) {
     var paramNames = [];
-    var params = lisp.termToList(args[0]);
-    for (var i = 0; i < params.length; i++) {
-        lisp.checkType(params[i], 'symbol');
-        paramNames.push(params[i].s);
+    var restParam = null;
+    var params = args[0];
+
+    // Parse the argument list
+    while (params.type == 'cons') {
+        lisp.checkType(params.car, 'symbol');
+        paramNames.push(params.car.s);
+        params = params.cdr;
     }
+
+    // Last argument - either a 'rest' symbol, e.g. (a b . c),
+    // or nil
+    if (params.type == 'symbol')
+        restParam = params.s;
+    else
+        lisp.checkType(params, 'nil');
 
     return new lisp.Func(
         name, function(funcArgs) {
             // bind the values to param names
-            lisp.checkNumArgs(name, paramNames.length, funcArgs);
+            if (restParam == null)
+                lisp.checkNumArgs(name, paramNames.length, funcArgs);
+            else {
+                if (funcArgs.length < paramNames.length)
+                    throw 'too few arguments for '+name;
+            }
+
             var vars = {};
             for (var i = 0; i < paramNames.length; i++)
                 vars[paramNames[i]] = funcArgs[i];
+            if (restParam != null) {
+                vars[restParam] = lisp.listToTerm(funcArgs.slice(paramNames.length));
+            }
 
             // now evaluate the function body
             var newEnv = env.extend(vars);
