@@ -33,8 +33,15 @@ lisp.Cons.prototype = {
             var s = this.car.s;
             var arg = this.cdr.car;
 
-            if (s == 'quote')
+            switch (s) {
+            case 'quote':
                 return "'" + arg.print();
+            case 'quasiquote':
+                return '`' + arg.print();
+            case 'unquote':
+                return ',' + arg.print();
+            default: // fall through
+            }
         }
 
         var s = '(' + this.car.print();
