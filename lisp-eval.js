@@ -88,7 +88,7 @@ lisp.Cons.prototype.eval = function(env) {
             }
 
             // now evaluate the rest of the form in a new environment
-            var newEnv = env.extend(vars);
+            var newEnv = new lisp.Env(vars, env);
             return lisp.evalList(args, 1, newEnv);
         }
 
@@ -127,7 +127,7 @@ lisp.Cons.prototype.eval = function(env) {
                     lisp.env.vars[name] = func;
                     return func;
                 } else {
-                    lisp.macros[name] = func;
+                    lisp.addMacro(name, func);
                     return new lisp.Symbol(name);
                 }
             }
@@ -202,16 +202,18 @@ lisp.makeFuncFromDef = function(env, args, name) {
             }
 
             // now evaluate the function body
-            var newEnv = env.extend(vars);
+            var newEnv = new lisp.Env(vars, env);
             return lisp.evalList(args, 1, newEnv);
         });
 };
 
-// A basic Lisp variables environment. Make new one using the extend() method
-lisp.env = {
-    vars: {},
-    parent: null,
-
+// A basic Lisp variables environment.
+lisp.Env = function(vars, parent) {
+    this.vars = vars;
+    this.parent = parent;
+    vars: {}
+};
+lisp.Env.prototype = {
     // variable lookup
     get: function(name) {
         if (name in this.vars)
@@ -228,17 +230,9 @@ lisp.env = {
         } else if (this.parent)
             return this.parent.set(name, value);
         return false;
-    },
-
-    // make new environment on top of current and return it
-    extend: function(vars) {
-        return {
-            __proto__: lisp.env,
-            vars: vars,
-            parent: this
-        };
     }
 };
+lisp.env = new lisp.Env({}, null);
 
 lisp.evalQuasi = function(term, level, env) {
     if (term.type == 'cons' && term.car.type == 'symbol') {

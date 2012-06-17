@@ -1,7 +1,4 @@
 
-// Macro environment - a mapping from names to functions.
-lisp.macros = {};
-
 // Perform one step of macroexpansion for given source term
 // (source code).
 // hasHead - if false, do not append to invoke a macro in the
@@ -19,12 +16,13 @@ lisp.macroExpandOne = function(term, hasHead, quasiLevel) {
     // now, maybe the term itself is a macro invocation
     if (hasHead &&
         quasiLevel == 0 &&
-        term.car.type == 'symbol' &&
-        term.car.s in lisp.macros) {
-
-        var func = lisp.macros[term.car.s];
-        var args = lisp.termToList(term.cdr);
-        return func.run(args);
+        term.car.type == 'symbol')
+    {
+        var func = lisp.env.get('macro:'+term.car.s);
+        if (func != null) {
+            var args = lisp.termToList(term.cdr);
+            return func.run(args);
+        }
     }
 
     if (quasiLevel == 0 &&
@@ -53,4 +51,8 @@ lisp.macroExpand = function(term) {
     while ((newTerm = lisp.macroExpandOne(term, true, 0)) != null)
         term = newTerm;
     return term;
+};
+
+lisp.addMacro = function(name, func) {
+    lisp.env.vars['macro:'+name] = func;
 };
