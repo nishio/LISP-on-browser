@@ -6,7 +6,6 @@ lisp.macros = {};
 // (source code). If hasHead is false, do not append to invoke
 // a macro in the head of the term.
 lisp.macroExpandOne = function(term, hasHead) {
-    console.log(term.print());
     if (term.type != 'cons')
         return null;
 
