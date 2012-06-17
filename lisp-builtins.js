@@ -132,3 +132,20 @@ lisp.env.vars['expand-code'] =
                       lisp.checkNumArgs('expand-code', 1, args);
                       return lisp.macroExpand(args[0]);
                   });
+
+lisp.gensymCounter = 0;
+
+lisp.env.vars.gensym =
+    new lisp.Func('gensym',
+                  function(args) {
+                      var s;
+                      if (args.length == 0)
+                          s = 'sym';
+                      else {
+                          if (args.length != 1)
+                              throw 'gensym requires 0 or 1 args';
+                          lisp.checkType(args[0], 'symbol');
+                          s = args[0].s;
+                      }
+                      return new lisp.Symbol('#' + s + '-' + lisp.gensymCounter++);
+                  });
