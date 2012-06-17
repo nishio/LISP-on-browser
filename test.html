@@ -73,6 +73,39 @@
 ; and to demonstrate the short-circuit mechanism:
 ; ((unknown) should crash when run)
 (and (= 2 2) (= 2 3) (unknown))
+
+;; Hygiene in macros
+; Consider a simple macro:
+
+(defmacro (bad-swap a b)
+  `(let (tmp ,a)
+     (set! ,a ,b)
+     (set! ,b tmp)))
+
+; Usage example:
+(let (x 1 y 2)
+   (bad-swap x y)
+   (list x y))
+; (2 1)
+
+; Unfortunately, this fails if we have a variable called tmp!
+(let (x 1 tmp 2)
+   (bad-swap x tmp)
+   (list x tmp))
+; (1 2)
+
+; We solve that by using the gensym function to generate a new name
+; that will not conflict with anything else:
+(defmacro (swap a b)
+  (let (tmp (gensym 'tmp))
+    `(let (,tmp ,a)
+       (set! ,a ,b)
+       (set! ,b ,tmp))))
+
+; Now try:
+(expand-code '(swap x tmp))
+; (let (#tmp-0 x) (set! x tmp) (set! tmp #tmp-0))
+
 </textarea>
     <input type="button" id="clear" value="Clear terminal" />
     <input type="button" id="load" value="Load source" />
