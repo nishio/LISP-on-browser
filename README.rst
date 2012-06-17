@@ -26,28 +26,51 @@ TODO
   - given string such like "(* 1 (+ 2 3))" and return syntax trees
   - in this point forget about reader macros such as "'(1 2 3)"
 
-- (done)Milestone2: Some Built-in function
+- (done) Milestone2: Some Built-in function
 
-  - arithmetic functions: +, -, *, /
+  - arithmetic functions: +, -, \*, /
   - other functions: eval, cons, list
 
-- (done)Milestone3: A REPL interpreter(when user input (* 1 (+ 2 3)), it prints 5)
-- (done)Milestone4: Special forms: quote and if
-- (done)Milestone5: Reader syntax with apostrophe: '(+ 2 2) = (quote (+ 2 2))
+- (done) Milestone3: A REPL interpreter(when user input (* 1 (+ 2 3)), it prints 5)
 
-- Next milestones:
+  - Now we can (* 1 (+ 2 3))
 
-  - equality and comparison: =, /=, <, etc.
-  - lexical scope (let and variables)
-  - defining your own functions (defun)
-  - comments in the code
-  - a textbox for loading examples into interpreter
+- (done) Milestone4: Special forms: quote and if
+- (done) Milestone5: Reader syntax with apostrophe: '(+ 2 2) = (quote (+ 2 2))
+
+
+- Milestone6: equality and comparison: =, /=, <, etc.
+- Milestone7: comments in the code
+- Milestone8: a textbox for loading examples into interpreter
+
+- Milestone9: lexical scope (let and variables)
+- Milestone10: defining your own functions (defun)
+
+ - Now we can make factorial and counter
 
 - Further milestones (need to break into smaller milestones)
 
-  - Macros (and quasiquote/unquote)
   - Strings, I/O (print, read) using terminal
   - Macros (and quasiquote/unquote)
+
+::
+
+   ; factorial
+   (defun factorial (n) (if (= n 0) 1 (* n (factorial (- n 1)))))
+
+   ; counter
+   gosh> (define (counter)
+     (let ((count 0))
+        (lambda () (set! count (+ 1 count)))))
+   counter
+   gosh> (define c (counter))
+   c
+   gosh> (c)
+   1
+   gosh> (c)
+   2
+   gosh> (c)
+   3
 
 
 License
