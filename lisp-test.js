@@ -22,7 +22,7 @@ lisp.test = function() {
     lisp.terminal.echo('Running tests...');
     try {
         var oldEnv = lisp.env;
-        lisp.env = lisp.env.extend({});
+        lisp.env = new lisp.Env({}, oldEnv);
 
         var num = new lisp.Number(5);
         var sym = new lisp.Symbol('bla');
