@@ -240,22 +240,16 @@ lisp.evalQuasi = function(term, level, env) {
                 if (level == 0)
                     return lisp.evalQuasi(args[0], level+1, env);
                 else // level > 0
-                    return new lisp.Cons(
-                        term.car,
-                        new lisp.Cons(
-                            lisp.evalQuasi(args[0], level+1, env),
-                            lisp.nil));
+                    return lisp.form1('quasiquote',
+                                      lisp.evalQuasi(args[0], level+1, env));
             } else { // s == 'unquote'
                 if (level == 0)
                     throw 'unquote without quasiquote';
                 else if (level == 1)
                     return args[0].eval(env);
                 else // level > 1
-                    return new lisp.Cons(
-                        term.car,
-                        new lisp.Cons(
-                            lisp.evalQuasi(args[0], level-1, env),
-                            lisp.nil));
+                    return lisp.form1('unquote',
+                                      lisp.evalQuasi(args[0], level-1, env));
             }
         }
     }

@@ -90,3 +90,10 @@ lisp.listToTerm = function(list, start) {
         result = new lisp.Cons(list[i], result);
     return result;
 };
+
+// Construct a simple form (s arg)
+lisp.form1 = function(s, arg) {
+    return new lisp.Cons(new lisp.Symbol(s),
+                         new lisp.Cons(arg,
+                                       lisp.nil));
+};
