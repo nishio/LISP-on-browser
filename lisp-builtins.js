@@ -120,7 +120,7 @@ lisp.env.vars['expand-code-1'] =
     new lisp.Func('expand-code-1',
                   function(args) {
                       lisp.checkNumArgs('expand-code-1', 1, args);
-                      var result = lisp.macroExpandOne(args[0], true);
+                      var result = lisp.macroExpandOne(args[0], true, 0);
                       if (result == null)
                           return args[0];
                       return result;

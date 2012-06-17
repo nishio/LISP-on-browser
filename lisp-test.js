@@ -103,6 +103,10 @@ lisp.test = function() {
 
         assertEval('(* (foo 2) (foo 3))', '24');
 
+        assertEval("(expand-code '`((foo 1) ,(foo 2)))", "`((foo 1) ,(+ 2 2))");
+        assertEval("(expand-code '``((foo 1) ,(foo 2) ,,(foo 3)))",
+                   "``((foo 1) ,(foo 2) ,,(+ 3 3))");
+
         assertEval('(defmacro (plus x . xs) '
                    + '(if (empty? xs) x '
                    + '  (list \'+ x (cons \'plus xs))))',
