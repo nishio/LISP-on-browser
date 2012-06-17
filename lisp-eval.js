@@ -51,6 +51,16 @@ lisp.Cons.prototype.eval = function(env) {
                 return args[1].eval(env);
         }
 
+        case 'when': {
+            if (args.length == 0)
+                throw 'too few arguments to '+s;
+            var test = args[0].eval(env);
+            if (test.type == 'nil')
+                return lisp.nil;
+            else
+                return lisp.evalList(args, 1, env);
+        }
+
         case 'quote': {
             lisp.checkNumArgs('quote', 1, args);
             return args[0];

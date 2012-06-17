@@ -61,6 +61,9 @@ lisp.test = function() {
         assertEval('(if () a 3)', '3');
         assertEval('(if 4 5 a)', '5');
 
+        assertEval('(when (= 2 3) \'a \'b)', 'nil');
+        assertEval('(when (= 2 2) \'a \'b)', 'b');
+
         assertEval('(eval (quote (+ 2 2)))', '4');
 
         assertEval('(list)', 'nil');
