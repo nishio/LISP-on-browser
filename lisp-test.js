@@ -46,6 +46,9 @@ lisp.test = function() {
         assertEval("(car ''A)", 'quote');
         assertEval("'(+ 2 2)", '(+ 2 2)');
 
+        assertParse('`(a ,b)', '`(a ,b)');
+        assertParse('(quasiquote (a (unquote b)))', '`(a ,b)');
+
         assertEval('(+ 2 (* 3 4) (/ 2 4))', '14.5');
         assertEval('(+)', '0');
         assertEval('(*)', '1');

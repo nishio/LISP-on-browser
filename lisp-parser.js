@@ -21,7 +21,9 @@ lisp.Parser.prototype = {
         { type: '(', re: /^\(/ },
         { type: ')', re: /^\)/ },
         { type: '.', re: /^\./, withEnd: true },
-        { type: '\'', re: /^\'/ },
+        { type: 'quote', re: /^\'/ },
+        { type: 'quasiquote', re: /^`/ },
+        { type: 'unquote', re: /^,/ },
         { type: 'number', re: /^-?(\.\d+|\d+\.\d*|\d+)/, withEnd: true },
         { type: 'symbol', re: /^[^\s\(\);]+/, withEnd: true }
     ],
@@ -102,13 +104,15 @@ lisp.Parser.prototype = {
                     return new lisp.Symbol(s);
             }
 
-        case '\'': // quote
+        case 'quote':
+        case 'quasiquote':
+        case 'unquote':
             {
                 var term = this.readTerm();
                 if (term == null)
                     this.parseError();
                 return new lisp.Cons(
-                    new lisp.Symbol('quote'),
+                    new lisp.Symbol(tok.type),
                     new lisp.Cons(
                         term,
                         lisp.nil));
