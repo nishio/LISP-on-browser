@@ -7,7 +7,7 @@ lisp.replTerminal = function(elt) {
             try {
                 var term = lisp.parse(str);
                 if (term != null) {
-                    var result = term.eval(lisp.env);
+                    var result = lisp.evalCode(term, lisp.env);
                     terminal.echo(result.print());
                 }
             } catch (err) {
@@ -31,7 +31,7 @@ lisp.replLoader = function(source, button) {
                 while (!parser.empty()) {
                     var term = parser.readTerm();
                     if (term != null) {
-                        var result = term.eval(lisp.env);
+                        var result = lisp.evalCode(term, lisp.env);
                         lisp.terminal.echo(result.print());
                     } else { // term == null
                         if (!parser.empty())

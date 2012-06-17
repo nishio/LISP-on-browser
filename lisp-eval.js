@@ -226,3 +226,9 @@ lisp.env = {
         };
     }
 };
+
+// Macroexpand and evaluate code
+lisp.evalCode = function(term, env) {
+    term = lisp.macroExpand(term);
+    return term.eval(env);
+};
