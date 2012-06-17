@@ -5,13 +5,23 @@ lisp.Parser = function(str) {
     // We parse by cutting off chunks of 'input'
     this.str = str;
     this.input = str;
+    this.pos = 0;
 };
 lisp.Parser.prototype = {
     // Return a nice error position description
     parseError: function() {
-        var pos = this.str.length - this.input.length;
-        var start = this.str.substr(0, pos);
-        throw 'parse error: ' + start + '<here>' + this.input;
+        console.log(this.pos);
+        // Try to find the whole line
+        for (var start = this.pos; start >= 0 && this.str[start] != '\n';
+             start--)
+            ;
+        start++;
+        for (var end = this.pos; end < this.str.length && this.str[end] != '\n';
+             end++)
+            ;
+
+        throw 'Parse error: ' + this.str.substring(start, this.pos) + '<HERE>' +
+            this.str.substring(this.pos, end);
     },
 
     // Token types, and regexps used to match them.
@@ -45,8 +55,10 @@ lisp.Parser.prototype = {
                     break;
             }
         }
-        if (pos > 0)
+        if (pos > 0) {
+            this.pos += pos;
             this.input = this.input.substr(pos);
+        }
     },
 
     // Read a single token. Return null on end of input
@@ -69,6 +81,7 @@ lisp.Parser.prototype = {
                 if (!(n == this.input.length || this.tokenEnd.test(this.input[n])))
                     continue;
 
+            this.pos += n;
             this.input = this.input.substr(n);
             return { type: t.type, s: m[0] };
         }
@@ -77,6 +90,7 @@ lisp.Parser.prototype = {
 
     // Push a token back to input
     unreadToken: function(token) {
+        this.pos -= token.s.length;
         this.input = token.s + this.input;
     },
 
