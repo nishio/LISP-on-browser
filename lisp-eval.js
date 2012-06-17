@@ -56,6 +56,9 @@ lisp.Cons.prototype.eval = function(env) {
             return args[0];
         }
 
+        case 'quasiquote':
+            return lisp.evalQuasi(this, 0, env);
+
         case 'let': {
             if (args.length == 0)
                 throw 'too few arguments to let';
@@ -224,6 +227,47 @@ lisp.env = {
             vars: vars,
             parent: this
         };
+    }
+};
+
+lisp.evalQuasi = function(term, level, env) {
+    if (term.type == 'cons' && term.car.type == 'symbol') {
+        var s = term.car.s;
+        if (s == 'quasiquote' || s == 'unquote') {
+            var args = lisp.termToList(term.cdr);
+            lisp.checkNumArgs(s, 1, args);
+            if (s == 'quasiquote') {
+                if (level == 0)
+                    return lisp.evalQuasi(args[0], level+1, env);
+                else // level > 0
+                    return new lisp.Cons(
+                        term.car,
+                        new lisp.Cons(
+                            lisp.evalQuasi(args[0], level+1, env),
+                            lisp.nil));
+            } else { // s == 'unquote'
+                if (level == 0)
+                    throw 'unquote without quasiquote';
+                else if (level == 1)
+                    return args[0].eval(env);
+                else // level > 1
+                    return new lisp.Cons(
+                        term.car,
+                        new lisp.Cons(
+                            lisp.evalQuasi(args[0], level-1, env),
+                            lisp.nil));
+            }
+        }
+    }
+    // not a quasiquote or unquote
+    if (level == 0)
+        return term.eval(env);
+    else {
+        if (term.type == 'cons')
+            return new lisp.Cons(lisp.evalQuasi(term.car, level, env),
+                                 lisp.evalQuasi(term.cdr, level, env));
+        else
+            return term;
     }
 };
 
