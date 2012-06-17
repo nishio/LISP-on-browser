@@ -4,12 +4,64 @@
   <script src="jquery-1.7.2.min.js"></script>
   <script src="jquery.terminal-0.4.15.js"></script>
   <script src="lisp.js"></script>
+  <script src="lisp-parser.js"></script>
+  <script src="lisp-eval.js"></script>
+  <script src="lisp-repl.js"></script>
+  <script src="lisp-test.js"></script>
   <link rel="stylesheet" type="text/css" href="terminal.css" />
   <script>
-    $(function() { lisp.repl_terminal('#term'); });
+    $(function() {
+          lisp.replTerminal($('#term'));
+          lisp.replLoader($('#source'), $('#load'));
+          lisp.test();
+          $('body').click(function() { $('#term').terminal().disable(); });
+    });
   </script>
 </head>
 <body>
-  <div id="term"></div>
+  <div id="term" style="width: 48%; float: left;"></div>
+  <div style="width: 48%; float: right;">
+    <textarea id="source" style="width: 100%; height: 20em;">
+;; A few examples. Click 'Load source' to load them.
+
+; Closures
+(let (count 0)
+  (define (counter) (set! count (+ 1 count))))
+
+; You can also define variables
+(define x 2)
+(set! x 3)
+
+; Let
+(let (x 2 y 3) (+ x y))
+
+; Lambda
+(set! x (lambda () 'bla))
+(x)
+
+; Factorial example
+(define (fact n)
+  (if (= n 0)
+      1
+      (* n (fact (- n 1)))))
+(fact 5)
+
+; Length example
+(define (length list)
+  (if (empty? list)
+      0
+      (+ 1 (length (cdr list)))))
+(length '(1 2 3))
+
+; Map example
+(define (map func list)
+  (if (empty? list)
+      nil
+      (cons (func (car list))
+            (map func (cdr list)))))
+(map (lambda (x) (+ x 1)) '(1 2 3))
+</textarea>
+    <input type="button"  id="load"  value="Load source" />
+  </div>
 </body>
 </html>
