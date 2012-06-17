@@ -111,11 +111,7 @@ lisp.Parser.prototype = {
                 var term = this.readTerm();
                 if (term == null)
                     this.parseError();
-                return new lisp.Cons(
-                    new lisp.Symbol(tok.type),
-                    new lisp.Cons(
-                        term,
-                        lisp.nil));
+                return lisp.form1(tok.type, term);
             }
 
         case '(':
