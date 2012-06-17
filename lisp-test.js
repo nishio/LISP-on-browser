@@ -44,6 +44,10 @@ lisp.test = function() {
         assertEval("'(+ 2 2)", '(+ 2 2)');
 
         assertEval('(+ 2 (* 3 4) (/ 2 4))', '14.5');
+        assertEval('(+)', '0');
+        assertEval('(*)', '1');
+        assertEval('(- 1)', '-1');
+        assertEval('(/ 4)', '0.25');
 
         assertEval('(if () a 3)', '3');
         assertEval('(if 4 5 a)', '5');
