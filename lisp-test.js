@@ -35,6 +35,7 @@ lisp.test = function() {
         assertParse('(A B C)', '(a b c)');
         assertParse('(1 2 3 . 4)', '(1 2 3 . 4)');
         assertParse('(+ . (1 . (2 . (3 . ()))))', '(+ 1 2 3)');
+        assertParse('-2.5', '-2.5');
 
         assertParse('a;b', 'a');
         assertParse('(a;b\nc)', '(a c)');
