@@ -14,14 +14,15 @@ function assertParse(s1, s2) {
 };
 
 function assertEval(s1, s2) {
-    assertEqual(lisp.parse(s1).eval(lisp.env).print(), s2);
+    assertEqual(lisp.evalCode(lisp.parse(s1),
+                              lisp.env).print(), s2);
 };
 
 lisp.test = function() {
     lisp.terminal.echo('Running tests...');
     try {
         var oldEnv = lisp.env;
-        lisp.env = lisp.env.extend({});
+        lisp.env = new lisp.Env({}, oldEnv);
 
         var num = new lisp.Number(5);
         var sym = new lisp.Symbol('bla');
@@ -35,18 +36,33 @@ lisp.test = function() {
         assertParse('(A B C)', '(a b c)');
         assertParse('(1 2 3 . 4)', '(1 2 3 . 4)');
         assertParse('(+ . (1 . (2 . (3 . ()))))', '(+ 1 2 3)');
+        assertParse('-2.5', '-2.5');
 
         assertParse('a;b', 'a');
         assertParse('(a;b\nc)', '(a c)');
 
-        assertParse("'(+ 2 2)", '(quote (+ 2 2))');
-        assertParse("'A", '(quote a)');
+        assertParse("'(+ 2 2)", "'(+ 2 2)");
+        assertParse("'A", "'a");
+        assertEval("(car ''A)", 'quote');
         assertEval("'(+ 2 2)", '(+ 2 2)');
 
+        assertParse('`(a ,b)', '`(a ,b)');
+        assertParse('(quasiquote (a (unquote b)))', '`(a ,b)');
+
+        assertEval('`(+ 1 2 ,(+ 3 4))', '(+ 1 2 7)');
+        assertEval('``(+ 1 2 ,(+ 3 ,(+ 2 2)))', '`(+ 1 2 ,(+ 3 4))');
+
         assertEval('(+ 2 (* 3 4) (/ 2 4))', '14.5');
+        assertEval('(+)', '0');
+        assertEval('(*)', '1');
+        assertEval('(- 1)', '-1');
+        assertEval('(/ 4)', '0.25');
 
         assertEval('(if () a 3)', '3');
         assertEval('(if 4 5 a)', '5');
+
+        assertEval('(when (= 2 3) \'a \'b)', 'nil');
+        assertEval('(when (= 2 2) \'a \'b)', 'b');
 
         assertEval('(eval (quote (+ 2 2)))', '4');
 
@@ -80,6 +96,27 @@ lisp.test = function() {
         assertEval('(define x 10)', '10');
         assertEval('(set! x 11)', '11');
         assertEval('x', '11');
+
+        assertEval('(let (f (lambda (x y . z) (list x y z))) (f 1 2 3 4))',
+                   '(1 2 (3 4))');
+
+        assertEval('(defmacro (foo x) (list \'+ x x))', 'foo');
+        assertEval('(expand-code-1 \'(foo bar))', '(+ bar bar)');
+        assertEval('(expand-code-1 \'(+ 2 (foo bar)))', '(+ 2 (+ bar bar))');
+
+        assertEval('(* (foo 2) (foo 3))', '24');
+
+        assertEval("(expand-code '`((foo 1) ,(foo 2)))", "`((foo 1) ,(+ 2 2))");
+        assertEval("(expand-code '``((foo 1) ,(foo 2) ,,(foo 3)))",
+                   "``((foo 1) ,(foo 2) ,,(+ 3 3))");
+
+        assertEval('(defmacro (plus x . xs) '
+                   + '(if (empty? xs) x '
+                   + '  (list \'+ x (cons \'plus xs))))',
+                   'plus');
+        assertEval('(expand-code \'(plus a b c d))', '(+ a (+ b (+ c d)))');
+
+        assertEval('(- (plus 1 2 3))', '-6');
 
         lisp.env = oldEnv;
         lisp.terminal.echo('All tests OK!');

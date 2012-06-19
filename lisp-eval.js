@@ -51,10 +51,23 @@ lisp.Cons.prototype.eval = function(env) {
                 return args[1].eval(env);
         }
 
+        case 'when': {
+            if (args.length == 0)
+                throw 'too few arguments to '+s;
+            var test = args[0].eval(env);
+            if (test.type == 'nil')
+                return lisp.nil;
+            else
+                return lisp.evalList(args, 1, env);
+        }
+
         case 'quote': {
             lisp.checkNumArgs('quote', 1, args);
             return args[0];
         }
+
+        case 'quasiquote':
+            return lisp.evalQuasi(this, 0, env);
 
         case 'let': {
             if (args.length == 0)
@@ -75,7 +88,7 @@ lisp.Cons.prototype.eval = function(env) {
             }
 
             // now evaluate the rest of the form in a new environment
-            var newEnv = env.extend(vars);
+            var newEnv = new lisp.Env(vars, env);
             return lisp.evalList(args, 1, newEnv);
         }
 
@@ -88,11 +101,14 @@ lisp.Cons.prototype.eval = function(env) {
             return lisp.makeFuncFromDef(env, args, '(lambda)');
         }
 
-        case 'define': {
+        case 'define':
+        case 'defmacro': {
             if (args.length == 0)
-                throw 'too few arguments to define';
+                throw 'too few arguments to '+s;
             if (args[0].type == 'symbol') {
                 // form: (define x ...)
+                if (s == 'defmacro')
+                    throw 'symbol macros are not supported';
                 var name = args[0].s;
                 var value = lisp.evalList(args, 1, env);
                 lisp.env.vars[name] = value;
@@ -107,8 +123,13 @@ lisp.Cons.prototype.eval = function(env) {
                 args[0] = args[0].cdr;
 
                 var func = lisp.makeFuncFromDef(env, args, name);
-                lisp.env.vars[name] = func;
-                return func;
+                if (s == 'define') {
+                    lisp.env.vars[name] = func;
+                    return func;
+                } else {
+                    lisp.addMacro(name, func);
+                    return new lisp.Symbol(name);
+                }
             }
         }
 
@@ -146,31 +167,53 @@ lisp.evalList = function(terms, start, env) {
 // Make a Func from arguments to (defun ...) or (lambda ...)
 lisp.makeFuncFromDef = function(env, args, name) {
     var paramNames = [];
-    var params = lisp.termToList(args[0]);
-    for (var i = 0; i < params.length; i++) {
-        lisp.checkType(params[i], 'symbol');
-        paramNames.push(params[i].s);
+    var restParam = null;
+    var params = args[0];
+
+    // Parse the argument list
+    while (params.type == 'cons') {
+        lisp.checkType(params.car, 'symbol');
+        paramNames.push(params.car.s);
+        params = params.cdr;
     }
+
+    // Last argument - either a 'rest' symbol, e.g. (a b . c),
+    // or nil
+    if (params.type == 'symbol')
+        restParam = params.s;
+    else
+        lisp.checkType(params, 'nil');
 
     return new lisp.Func(
         name, function(funcArgs) {
             // bind the values to param names
-            lisp.checkNumArgs(name, paramNames.length, funcArgs);
+            if (restParam == null)
+                lisp.checkNumArgs(name, paramNames.length, funcArgs);
+            else {
+                if (funcArgs.length < paramNames.length)
+                    throw 'too few arguments for '+name;
+            }
+
             var vars = {};
             for (var i = 0; i < paramNames.length; i++)
                 vars[paramNames[i]] = funcArgs[i];
+            if (restParam != null) {
+                vars[restParam] = lisp.listToTerm(funcArgs.slice(paramNames.length));
+            }
 
             // now evaluate the function body
-            var newEnv = env.extend(vars);
+            var newEnv = new lisp.Env(vars, env);
             return lisp.evalList(args, 1, newEnv);
         });
 };
 
-// A basic Lisp variables environment. Make new one using the extend() method
-lisp.env = {
-    vars: {},
-    parent: null,
-
+// A basic Lisp variables environment.
+lisp.Env = function(vars, parent) {
+    this.vars = vars;
+    this.parent = parent;
+    vars: {}
+};
+lisp.Env.prototype = {
     // variable lookup
     get: function(name) {
         if (name in this.vars)
@@ -187,92 +230,47 @@ lisp.env = {
         } else if (this.parent)
             return this.parent.set(name, value);
         return false;
-    },
+    }
+};
+lisp.env = new lisp.Env({}, null);
 
-    // make new environment on top of current and return it
-    extend: function(vars) {
-        return {
-            __proto__: lisp.env,
-            vars: vars,
-            parent: this
-        };
+lisp.evalQuasi = function(term, level, env) {
+    if (term.type == 'cons' && term.car.type == 'symbol') {
+        var s = term.car.s;
+        if (s == 'quasiquote' || s == 'unquote') {
+            var args = lisp.termToList(term.cdr);
+            lisp.checkNumArgs(s, 1, args);
+            if (s == 'quasiquote') {
+                if (level == 0)
+                    return lisp.evalQuasi(args[0], level+1, env);
+                else // level > 0
+                    return lisp.form1('quasiquote',
+                                      lisp.evalQuasi(args[0], level+1, env));
+            } else { // s == 'unquote'
+                if (level == 0)
+                    throw 'unquote without quasiquote';
+                else if (level == 1)
+                    return args[0].eval(env);
+                else // level > 1
+                    return lisp.form1('unquote',
+                                      lisp.evalQuasi(args[0], level-1, env));
+            }
+        }
+    }
+    // not a quasiquote or unquote
+    if (level == 0)
+        return term.eval(env);
+    else {
+        if (term.type == 'cons')
+            return new lisp.Cons(lisp.evalQuasi(term.car, level, env),
+                                 lisp.evalQuasi(term.cdr, level, env));
+        else
+            return term;
     }
 };
 
-// Builtin functions
-
-lisp.numFunc = function(name, func) {
-    return new lisp.Func(
-        name, function(args) {
-            if (args.length == 0)
-                throw 'too few arguments to '+name;
-            var n = args[0].n;
-            for (var i = 1; i < args.length; i++) {
-                lisp.checkType(args[i], 'number');
-                n = func(n, args[i].n);
-            }
-            return new lisp.Number(n);
-        });
+// Macroexpand and evaluate code
+lisp.evalCode = function(term, env) {
+    term = lisp.macroExpand(term);
+    return term.eval(env);
 };
-
-lisp.env.vars['+'] = lisp.numFunc('+', function(a,b) { return a+b; });
-lisp.env.vars['-'] = lisp.numFunc('-', function(a,b) { return a-b; });
-lisp.env.vars['*'] = lisp.numFunc('*', function(a,b) { return a*b; });
-lisp.env.vars['/'] = lisp.numFunc('/', function(a,b) {
-                                      if (b == 0)
-                                          throw 'division by zero';
-                                      else
-                                          return a/b; });
-
-lisp.env.vars.t = new lisp.Symbol('t');
-lisp.env.vars.t.eval = function() { return this; };
-
-lisp.env.vars.eval = new lisp.Func('eval', function(args) {
-                                       lisp.checkNumArgs('eval', 1, args);
-                                       return args[0].eval(lisp.env);
-                                   });
-
-lisp.tSym = lisp.env.vars.t;
-
-lisp.boolTerm = function(v) { return v ? lisp.tSym : lisp.nil; };
-
-lisp.env.vars.list = new lisp.Func('list', function(args) {
-                                       return lisp.listToTerm(args);
-                              });
-lisp.env.vars.cons = new lisp.Func('cons', function(args) {
-                                       lisp.checkNumArgs('cons', 2, args);
-                                       return new lisp.Cons(args[0], args[1]);
-                                   });
-lisp.env.vars.car = new lisp.Func('car', function(args) {
-                                      lisp.checkNumArgs('car', 1, args);
-                                      lisp.checkType(args[0], 'cons');
-                                      return args[0].car;
-                                   });
-lisp.env.vars.cdr = new lisp.Func('cdr', function(args) {
-                                      lisp.checkNumArgs('car', 1, args);
-                                      lisp.checkType(args[0], 'cons');
-                                      return args[0].cdr;
-                                   });
-lisp.env.vars['empty?'] = new lisp.Func('empty?', function(args) {
-                                            lisp.checkNumArgs('empty?', 1, args);
-                                            return lisp.boolTerm(args[0].type == 'nil');
-                                        });
-
-lisp.compareFunc = function(name, func) {
-    return new lisp.Func(
-        name, function(args) {
-            lisp.checkNumArgs(name, 2, args);
-            lisp.checkType(args[0], 'number');
-            lisp.checkType(args[1], 'number');
-            return lisp.boolTerm(func(args[0].n, args[1].n));
-        });
-};
-
-
-
-lisp.env.vars['=']  = lisp.compareFunc('=',  function(a,b) { return a == b; });
-lisp.env.vars['/='] = lisp.compareFunc('/=', function(a,b) { return a != b; });
-lisp.env.vars['>']  = lisp.compareFunc('>',  function(a,b) { return a > b; });
-lisp.env.vars['>='] = lisp.compareFunc('>=', function(a,b) { return a >= b; });
-lisp.env.vars['<']  = lisp.compareFunc('<',  function(a,b) { return a < b; });
-lisp.env.vars['<='] = lisp.compareFunc('<=', function(a,b) { return a <= b; });

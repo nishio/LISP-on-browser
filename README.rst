@@ -23,13 +23,10 @@ TODO
 
 - Refactor commit history so that readers can learn how to implement LISP step by step.
   'feature/M1-S-Expression-Parser' branch is nice but 'feature/M2' has actually 4 milestone.
-- Implement 'feature/macro'
 
-  - variable-length argument lists (func arg1 arg2 . rest)
-  - defmacro and macro-expansion stage
-  - macroexpand function
-  - quasiquote and unquote (` ,) for easier building of macros
-  - a 'gensym' function and example illustrating the problem of hygiene in macros.
+- Connect with https://github.com/nishio/AST-Visualization-on-browser
+
+- Make a site in English and Japanese (for my book's readers)
 
 History
 =======
@@ -67,6 +64,12 @@ This list corresponds to current commit history. We need refactor it.
     - Now we can make factorial and counter
 
 - 'feature/macro'
+
+  - variable-length argument lists (func arg1 arg2 . rest)
+  - defmacro and macro-expansion stage
+  - macroexpand function
+  - quasiquote and unquote (` ,) for easier building of macros
+  - a 'gensym' function and example illustrating the problem of hygiene in macros.
 
 
 
