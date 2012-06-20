@@ -12,11 +12,11 @@ lisp.Parser.prototype = {
     parseError: function() {
         console.log(this.pos);
         // Try to find the whole line
-        for (var start = this.pos; start >= 0 && this.str[start] != '\n';
+        for (var start = this.pos; start >= 0 && this.str.charAt(start) != '\n';
              start--)
             ;
         start++;
-        for (var end = this.pos; end < this.str.length && this.str[end] != '\n';
+        for (var end = this.pos; end < this.str.length && this.str.charAt(end) != '\n';
              end++)
             ;
 
@@ -43,7 +43,7 @@ lisp.Parser.prototype = {
     consumeSpaces: function() {
         var inComment = false;
         for (var pos = 0; pos < this.input.length; pos++) {
-            var c = this.input[pos];
+            var c = this.input.charAt(pos);
             if (inComment)
             {
                 if (c == '\n')
@@ -78,7 +78,8 @@ lisp.Parser.prototype = {
 
             // do we require a non-atom after this token?
             if (t.withEnd)
-                if (!(n == this.input.length || this.tokenEnd.test(this.input[n])))
+                if (!(n == this.input.length ||
+                      this.tokenEnd.test(this.input.charAt(n))))
                     continue;
 
             this.pos += n;
