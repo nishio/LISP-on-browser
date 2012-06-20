@@ -1,6 +1,9 @@
 
 // Evaluation engine
 
+// Evaluation context, as a list of strings
+lisp.stackTrace = [];
+
 // A lisp function value. run has to be a function(args)
 // (or just a function(args)
 lisp.Func = function(name, run) {
@@ -153,7 +156,10 @@ lisp.Cons.prototype.eval = function(env) {
     for (var i = 0; i < args.length; ++i)
         args[i] = args[i].eval(env);
 
-    return car.run(args);
+    lisp.stackTrace.push(this.print());
+    var result = car.run(args);
+    lisp.stackTrace.pop();
+    return result;
 };
 
 lisp.evalList = function(terms, start, env) {
@@ -269,8 +275,27 @@ lisp.evalQuasi = function(term, level, env) {
     }
 };
 
-// Macroexpand and evaluate code
+// Handle stack traces in code
+lisp.runWithStackTrace = function(func) {
+    try {
+        func();
+        lisp.stackTrace = [];
+    } catch (err) {
+        while (lisp.stackTrace.length > 0)
+            err += '\nin '+lisp.stackTrace.pop();
+        throw err;
+    }
+};
+
+// Macroexpand and evaluate code; handle stack traces
 lisp.evalCode = function(term, env) {
-    term = lisp.macroExpand(term);
-    return term.eval(env);
+    lisp.runWithStackTrace(function() {
+                               term = lisp.macroExpand(term);
+                           });
+
+    var result;
+    lisp.runWithStackTrace(function() {
+                               result = term.eval(env);
+                           });
+    return result;
 };
