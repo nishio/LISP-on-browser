@@ -38,7 +38,6 @@ lisp.replLoader = function(source, button) {
                             parser.parseError();
                     }
                 }
-                lisp.terminal.focus();
             } catch(err) {
                 console.log(err);
                 lisp.terminal.error(err);
