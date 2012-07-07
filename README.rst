@@ -5,9 +5,11 @@
 This is small implementation of LISP,
 which written in JavaScript and run on browsers.
 
-I think it helps you to understand what goint on in programming languages
+I think it helps you to understand what going on in programming languages
 by using it and reading its source codes.
 
+
+.. demo
 
 Design
 ======
