@@ -78,10 +78,10 @@ This list corresponds to current commit history. We need refactor it.
 License
 =======
 
-GPLv3
+GPLv3 (c) NISHIO Hirokazu 2012
 
 
 Thanks
 ======
 
-Paweł Marczewski wrote almost codes.
+Paweł Marczewski contributed much to the project.
