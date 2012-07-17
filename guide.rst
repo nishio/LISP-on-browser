@@ -66,7 +66,7 @@ Next, we want to evaluate the S-expressions to create our first
 interpreter. To do that, we define the ``eval()`` method for all
 values.
 
-Number and ``nil`` evaluate to themselves (``return this``). Symbols
+Numbers and ``nil`` evaluate to themselves (``return this``). Symbols
 evaluate to their values in a global environment (``return
 lisp.env[this.s]``). Right now we define four values: ``+``, ``-``,
 ``*``, ``/``. They are of course the arithmetic functions.
@@ -75,10 +75,14 @@ To define them, we create a new type of value - a function
 (``Func``). The function is expected to have a ``run(args)`` method
 that returns the result.
 
-Finally, the ``eval`` method for cons pairs actually evaluates the
-expression. We first evaluate the first element (a function), then all
-others (the arguments). Finally, we pass the evaluated arguments to a
-function and return its result.
+Finally, we can evaluate Lisp *forms*, i.e. list expressions like
+``(func arg1 arg2 arg3)``. The first element is the function, and the
+rest of them are arguments.
+
+The ``eval`` method for cons pairs (``Cons.prototype.eval()``) takes
+care of them. We first evaluate the first element (a function), then
+all others (the arguments). Finally, we pass the evaluated arguments
+to a function and return its result.
 
 For the interpreter to give sensible error messages, we also add
 simple type checking (``lisp.checkType``).
@@ -89,11 +93,12 @@ simple type checking (``lisp.checkType``).
 Special forms
 =============
 
-Some parts of Lisp don't behave like normal functions - they don't
-want their arguments evaluated. A good example is ``quote``, which is
-actually used to suppress evaluation. Another one is ``if``: in ``(if
-test then-part else-part)`` we first evaluate ``test``, then decide
-whether to evaluate ``then-part`` or ``else-part``.
+Some forms in Lisp code are not function calls: they begin with a
+special keyword, and their arguments are not necessarily evaluated. A
+good example is ``quote``, which is actually used to suppress
+evaluation. Another one is ``if``: in ``(if test then-part
+else-part)`` we first evaluate ``test``, then decide whether to
+evaluate ``then-part`` or ``else-part``.
 
 Forms beginning with ``if`` and ``quote`` are called *special
 forms*. We extend the evaluator for cons pairs to deal with these - if
@@ -111,15 +116,14 @@ that ``'(a b c)`` reads as ``(quote (a b c))``.
 Local scope
 ===========
 
-Right now we have only global variables (actually global functions,
-but it would be easy to add variables). We want the user to be able to
-define local variables (e.g. ``(let (x 10) (+ x y))``), so we
+Right now all of our variables are global. We want the user to be able
+to define local variables (e.g. ``(let (x 10) (+ x y))``), so we
 introduce the concept of local environment.
 
 The environment (``lisp.env``) now has a hierarchical structure -- we
 can call the ``extend`` function to create a new one on top of the
 old. For example, in ``(let (x 2 y 3) (let (x 4) (+ x y)))`` the
-hierarchy in which ``(+ x y)`` gets executed is: ::
+hierarchy in which ``(+ x y)`` gets evaluated is: ::
 
     (global variables)
       {x: 2, y: 3}
@@ -143,9 +147,9 @@ Defining your own functions
 
 Now we can create ``lambda`` and ``define``, forms that allow the user
 to create their own functions. They create a new ``Func`` value, which
-stores code to be executed later.
+stores code to be evaluated later.
 
-An important detail is that the code is executed *in the environment
+An important detail is that the code is evaluated *in the environment
 where it was defined* (extended with current arguments), not in the
 one where it was called. In other words, each ``Func`` remembers its
 own environment.
@@ -160,6 +164,22 @@ the reference to ``x`` (the reference is called *lexical
 closure*). The effect wouldn't be possible if we always used the
 caller's environment -- that would be *dynamic scoping* (which also
 has its uses).
+
+Lexical scoping is very useful with higher order code -- we can store
+and pass the newly created functions (e.g. ``(map (adder x) '(1 2
+3))``), and be certain that they will keep using our local
+variables. It also allows us to use the lexical closure as *state*,
+making the code somewhat object-oriented: ::
+
+   ; A counter with internal state
+   (let (count 0)
+     (define (counter)
+        (set! count (+ 1 count))))
+
+   (counter) ; -> 1
+   (counter) ; -> 2
+   (counter) ; -> 3
+
 
 `Function code
 <https://github.com/nishio/LISP-on-browser/blob/40c2ddf0d45ef477d5eedd10ad328caf004a9e7b/lisp-eval.js>`_
@@ -178,9 +198,16 @@ the resulting ``Func`` in a special dictionary called ``lisp.macros``.
 
 We first implement a ``macroExpandOne`` function that performs one
 step of macroexpansion (to expand the code fully, we invoke it
-repeatedly). The function tries to expand the first element of a
-form, then the form itself, then all other elements. We omit
-expressions inside ``quote``.
+repeatedly). The function tries to expand the first element of a form,
+then the form itself, then all other elements. We also omit
+quoted expressions. For instance, in the code ``(a b '(c
+d) (e f))``, we will try to
+
+- expand ``a`` -- it's not a list so nothing happens,
+- expand ``(a b (c d))``, if ``a`` is a macro,
+- expand ``b`` -- it's not a list,
+- expand ``'(c d)`` -- it's quoted so we omit it,
+- expand ``(e f)``, if ``c`` is a macro.
 
 `Defmacro and macroexpansion code
 <https://github.com/nishio/LISP-on-browser/commit/9c82177001d907aa3e8cb4c44a8b076988c53267>`_
