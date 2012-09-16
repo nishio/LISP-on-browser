@@ -13,10 +13,10 @@ lisp.Func = function(name, run) {
 lisp.Func.prototype = {
     type: 'function',
     print: function() {
-        return '<function '+ this.name+ '>';
+        return '<function ' + this.name + '>';
     },
     eval: function() {
-        throw 'trying to evaluate '+this.print()+' again';
+        throw 'trying to evaluate ' + this.print() + ' again';
     }
 };
 
@@ -33,7 +33,7 @@ lisp.Symbol.prototype.eval = function(env) {
     if (v)
         return v;
     else
-        throw 'undefined variable: '+this.s;
+        throw 'undefined variable: ' + this.s;
 };
 
 lisp.Cons.prototype.eval = function(env) {
@@ -43,7 +43,7 @@ lisp.Cons.prototype.eval = function(env) {
     if (this.car.type == 'symbol') {
         var s = this.car.s;
 
-        switch(s) {
+        switch (s) {
 
         case 'if': {
             lisp.checkNumArgs('if', 3, args);
@@ -56,7 +56,7 @@ lisp.Cons.prototype.eval = function(env) {
 
         case 'when': {
             if (args.length == 0)
-                throw 'too few arguments to '+s;
+                throw 'too few arguments to ' + s;
             var test = args[0].eval(env);
             if (test.type == 'nil')
                 return lisp.nil;
@@ -80,13 +80,13 @@ lisp.Cons.prototype.eval = function(env) {
             // we expect a list: (name value name value...)
             var bindings = lisp.termToList(args[0]);
             if (bindings.length % 2 != 0)
-                throw 'bad bindings format: '+args[0].print();
+                throw 'bad bindings format: ' + args[0].print();
 
             var vars = {};
-            for (var i = 0; i < bindings.length; i+=2) {
+            for (var i = 0; i < bindings.length; i += 2) {
                 lisp.checkType(bindings[i], 'symbol');
                 var name = bindings[i].s;
-                var value = bindings[i+1].eval(env);
+                var value = bindings[i + 1].eval(env);
                 vars[name] = value;
             }
 
@@ -107,7 +107,7 @@ lisp.Cons.prototype.eval = function(env) {
         case 'define':
         case 'defmacro': {
             if (args.length == 0)
-                throw 'too few arguments to '+s;
+                throw 'too few arguments to ' + s;
             if (args[0].type == 'symbol') {
                 // form: (define x ...)
                 if (s == 'defmacro')
@@ -142,7 +142,7 @@ lisp.Cons.prototype.eval = function(env) {
             var name = args[0].s;
             var value = args[1].eval(env);
             if (!env.set(name, value))
-                throw 'undefined variable: '+name;
+                throw 'undefined variable: ' + name;
             return value;
         }
 
@@ -197,7 +197,7 @@ lisp.makeFuncFromDef = function(env, args, name) {
                 lisp.checkNumArgs(name, paramNames.length, funcArgs);
             else {
                 if (funcArgs.length < paramNames.length)
-                    throw 'too few arguments for '+name;
+                    throw 'too few arguments for ' + name;
             }
 
             var vars = {};
@@ -217,7 +217,7 @@ lisp.makeFuncFromDef = function(env, args, name) {
 lisp.Env = function(vars, parent) {
     this.vars = vars;
     this.parent = parent;
-    vars: {}
+    vars: {};
 };
 lisp.Env.prototype = {
     // variable lookup
@@ -248,10 +248,10 @@ lisp.evalQuasi = function(term, level, env) {
             lisp.checkNumArgs(s, 1, args);
             if (s == 'quasiquote') {
                 if (level == 0)
-                    return lisp.evalQuasi(args[0], level+1, env);
+                    return lisp.evalQuasi(args[0], level + 1, env);
                 else // level > 0
                     return lisp.form1('quasiquote',
-                                      lisp.evalQuasi(args[0], level+1, env));
+                                      lisp.evalQuasi(args[0], level + 1, env));
             } else { // s == 'unquote'
                 if (level == 0)
                     throw 'unquote without quasiquote';
@@ -259,7 +259,7 @@ lisp.evalQuasi = function(term, level, env) {
                     return args[0].eval(env);
                 else // level > 1
                     return lisp.form1('unquote',
-                                      lisp.evalQuasi(args[0], level-1, env));
+                                      lisp.evalQuasi(args[0], level - 1, env));
             }
         }
     }
@@ -282,7 +282,7 @@ lisp.runWithStackTrace = function(func) {
         lisp.stackTrace = [];
     } catch (err) {
         while (lisp.stackTrace.length > 0)
-            err += '\nin '+lisp.stackTrace.pop();
+            err += '\nin ' + lisp.stackTrace.pop();
         throw err;
     }
 };

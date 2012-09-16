@@ -7,16 +7,16 @@ function assertEqual(e1, e2) {
         var err = 'Assertion failed: ' + e1 + ' != ' + e2;
         throw err;
     }
-};
+}
 
 function assertParse(s1, s2) {
     assertEqual(lisp.parse(s1).print(), s2);
-};
+}
 
 function assertEval(s1, s2) {
     assertEqual(lisp.evalCode(lisp.parse(s1),
                               lisp.env).print(), s2);
-};
+}
 
 lisp.test = function() {
     lisp.terminal.echo('Running tests...');
@@ -106,9 +106,9 @@ lisp.test = function() {
 
         assertEval('(* (foo 2) (foo 3))', '24');
 
-        assertEval("(expand-code '`((foo 1) ,(foo 2)))", "`((foo 1) ,(+ 2 2))");
+        assertEval("(expand-code '`((foo 1) ,(foo 2)))", '`((foo 1) ,(+ 2 2))');
         assertEval("(expand-code '``((foo 1) ,(foo 2) ,,(foo 3)))",
-                   "``((foo 1) ,(foo 2) ,,(+ 3 3))");
+                   '``((foo 1) ,(foo 2) ,,(+ 3 3))');
 
         assertEval('(defmacro (plus x . xs) '
                    + '(if (empty? xs) x '
@@ -121,6 +121,6 @@ lisp.test = function() {
         lisp.env = oldEnv;
         lisp.terminal.echo('All tests OK!');
     } catch (err) {
-        lisp.terminal.error('test: '+err);
+        lisp.terminal.error('test: ' + err);
     }
 };

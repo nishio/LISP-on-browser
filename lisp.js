@@ -64,12 +64,12 @@ lisp.nil = {
 
 lisp.checkType = function(term, type) {
     if (term.type != type)
-        throw 'expected '+type+', got '+term.print();
+        throw 'expected ' + type + ', got ' + term.print();
 };
 
 lisp.checkNumArgs = function(name, n, args) {
     if (args.length != n)
-        throw 'wrong number of arguments for '+name;
+        throw 'wrong number of arguments for ' + name;
 };
 
 lisp.termToList = function(term) {
@@ -86,7 +86,7 @@ lisp.listToTerm = function(list, start) {
     var result = start;
     if (start == undefined)
         result = lisp.nil;
-    for (var i = list.length-1; i >= 0; i--)
+    for (var i = list.length - 1; i >= 0; i--)
         result = new lisp.Cons(list[i], result);
     return result;
 };

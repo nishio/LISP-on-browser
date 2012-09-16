@@ -14,11 +14,11 @@ lisp.Parser.prototype = {
         // Try to find the whole line
         for (var start = this.pos; start >= 0 && this.str.charAt(start) != '\n';
              start--)
-            ;
+;
         start++;
         for (var end = this.pos; end < this.str.length && this.str.charAt(end) != '\n';
              end++)
-            ;
+;
 
         throw 'Parse error: ' + this.str.substring(start, this.pos) + '<HERE>' +
             this.str.substring(this.pos, end);

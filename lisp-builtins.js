@@ -29,7 +29,7 @@ lisp.env.vars['-'] = new lisp.Func(
         lisp.checkAllNumbers(args);
 
         if (args.length == 0)
-            throw 'too few arguments to '+name;
+            throw 'too few arguments to ' + name;
         else if (args.length == 1)
             return new lisp.Number(-args[0].n);
 
@@ -44,11 +44,11 @@ lisp.env.vars['/'] = new lisp.Func(
         lisp.checkAllNumbers(args);
 
         if (args.length == 0)
-            throw 'too few arguments to '+name;
+            throw 'too few arguments to ' + name;
         else if (args.length == 1) {
             if (args[0].n == 0)
                 throw 'division by zero';
-            return new lisp.Number(1/args[0].n);
+            return new lisp.Number(1 / args[0].n);
         }
 
         var n = args[0].n;
@@ -106,11 +106,11 @@ lisp.compareFunc = function(name, func) {
 
 
 
-lisp.env.vars['=']  = lisp.compareFunc('=',  function(a,b) { return a == b; });
+lisp.env.vars['='] = lisp.compareFunc('=', function(a,b) { return a == b; });
 lisp.env.vars['/='] = lisp.compareFunc('/=', function(a,b) { return a != b; });
-lisp.env.vars['>']  = lisp.compareFunc('>',  function(a,b) { return a > b; });
+lisp.env.vars['>'] = lisp.compareFunc('>', function(a,b) { return a > b; });
 lisp.env.vars['>='] = lisp.compareFunc('>=', function(a,b) { return a >= b; });
-lisp.env.vars['<']  = lisp.compareFunc('<',  function(a,b) { return a < b; });
+lisp.env.vars['<'] = lisp.compareFunc('<', function(a,b) { return a < b; });
 lisp.env.vars['<='] = lisp.compareFunc('<=', function(a,b) { return a <= b; });
 
 // We don't use the name 'macroexpand' because the functions expand all code,

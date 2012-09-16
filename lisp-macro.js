@@ -18,10 +18,10 @@ lisp.macroExpandOne = function(term, hasHead, quasiLevel) {
         quasiLevel == 0 &&
         term.car.type == 'symbol')
     {
-        var func = lisp.env.get('macro:'+term.car.s);
+        var func = lisp.env.get('macro:' + term.car.s);
         if (func != null) {
             var args = lisp.termToList(term.cdr);
-            lisp.stackTrace.push('macroexpand: '+term.print());
+            lisp.stackTrace.push('macroexpand: ' + term.print());
             var result = func.run(args);
             lisp.stackTrace.pop();
             return result;
@@ -57,5 +57,5 @@ lisp.macroExpand = function(term) {
 };
 
 lisp.addMacro = function(name, func) {
-    lisp.env.vars['macro:'+name] = func;
+    lisp.env.vars['macro:' + name] = func;
 };
